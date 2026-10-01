@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+build/
+dist/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Private working notes
+NEXT_STEPS.md
+
+# Never commit real workforce or claims data.
+# Only synthetic files in data/examples and data/templates are tracked.
+data/*
+!data/README.md
+!data/examples/
+!data/templates/
+*.xlsx
+real_*.csv
+
+# OS
+.DS_Store
