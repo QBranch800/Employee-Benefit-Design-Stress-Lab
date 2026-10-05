@@ -1,9 +1,3 @@
-"""Apply plans to a workforce and compare every employee with the baseline plan.
-
-Each employee keeps the same allowed healthcare cost under every plan, so any
-difference between plans is caused by plan design alone.
-"""
-
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -30,7 +24,6 @@ OUTCOME_UNCHANGED = "Unchanged"
 OUTCOME_WORSE = "Worse off"
 OUTCOMES: tuple[str, ...] = (OUTCOME_BETTER, OUTCOME_UNCHANGED, OUTCOME_WORSE)
 
-# Guards threshold comparisons against floating-point noise.
 EPSILON = 1e-9
 
 
@@ -42,7 +35,6 @@ def _tier_values(coverage: np.ndarray, plan: Plan, field: str) -> np.ndarray:
 
 
 def calculate_plan(workforce: pd.DataFrame, plan: Plan) -> pd.DataFrame:
-    """Employer and employee costs for every employee under one plan."""
     coverage = workforce["coverage_tier"].to_numpy(dtype=object)
     unsupported = set(coverage) - set(config.COVERAGE_TIERS)
     if unsupported:
@@ -83,18 +75,15 @@ def calculate_plan(workforce: pd.DataFrame, plan: Plan) -> pd.DataFrame:
     result["employee_oop"] = employee_oop
     result["total_burden"] = total_burden
     result["burden_pct"] = plan_rules.burden_pct_of_salary(total_burden, salary)
-    # An allowance is employer money too, so it counts toward employer cost.
     result["employer_cost"] = employer_premium + allowance_paid
     return result
 
 
 def is_above_threshold(burden_pct: pd.Series | np.ndarray, threshold_pct: float) -> np.ndarray:
-    """True where burden is strictly above the threshold; exactly at it is not above."""
     return np.asarray(burden_pct, dtype=float) > threshold_pct + EPSILON
 
 
 def classify_change(burden_change: pd.Series | np.ndarray, tolerance: float) -> np.ndarray:
-    """Label each change as better off, unchanged (within ± tolerance), or worse off."""
     change = np.asarray(burden_change, dtype=float)
     return np.select(
         [change < -tolerance - EPSILON, change > tolerance + EPSILON],
@@ -110,11 +99,6 @@ def evaluate_plans(
     threshold_pct: float,
     unchanged_tolerance: float,
 ) -> pd.DataFrame:
-    """Row-level results for every employee under every plan.
-
-    The first plan is the baseline. Changes are measured per employee against
-    their own baseline result.
-    """
     if not plans:
         raise ValueError("At least one plan is required.")
     names = [plan.name for plan in plans]

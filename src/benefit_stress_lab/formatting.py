@@ -1,5 +1,3 @@
-"""Consistent number formatting for the app, findings text, and exports."""
-
 from __future__ import annotations
 
 import math
@@ -13,7 +11,6 @@ def _is_missing(value: float | None) -> bool:
 
 
 def money(value: float | None, symbol: str = "$", *, signed: bool = False) -> str:
-    """``1234.5`` → ``$1,235``; with ``signed`` → ``+$1,235`` / ``−$1,235``."""
     if _is_missing(value):
         return MISSING
     rounded = round(float(value))
@@ -22,7 +19,6 @@ def money(value: float | None, symbol: str = "$", *, signed: bool = False) -> st
 
 
 def pct(value: float | None, decimals: int = 1, *, signed: bool = False) -> str:
-    """``12.345`` → ``12.3%``."""
     if _is_missing(value):
         return MISSING
     text = f"{abs(value):.{decimals}f}%"
@@ -32,7 +28,6 @@ def pct(value: float | None, decimals: int = 1, *, signed: bool = False) -> str:
 
 
 def pp(value: float | None, decimals: int = 1) -> str:
-    """Signed change in percentage points: ``2.04`` → ``+2.0 pp``."""
     if _is_missing(value):
         return MISSING
     text = f"{abs(value):.{decimals}f} pp"

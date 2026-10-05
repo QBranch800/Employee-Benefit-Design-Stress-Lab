@@ -74,7 +74,6 @@ def test_segments_are_ordered(rows):
 
 
 def test_most_affected_segment_is_found(make_workforce, current, proposed):
-    # A low-paid family group is hit much harder relative to salary than a high-paid single group.
     wf = make_workforce(
         [{"annual_salary": 35_000, "coverage_tier": "family", "annual_allowed_cost": 9_000}] * 10
         + [{"annual_salary": 150_000, "annual_allowed_cost": 600}] * 10

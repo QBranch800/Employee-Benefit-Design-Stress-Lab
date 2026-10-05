@@ -1,10 +1,3 @@
-"""Aggregate employee-level results into plan, segment, and outcome summaries.
-
-Segments smaller than the minimum group size are suppressed: their burden and
-cost metrics are hidden because small groups can identify individuals and
-reveal their healthcare use. Headcounts remain visible.
-"""
-
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -15,7 +8,6 @@ import pandas as pd
 from benefit_stress_lab import config
 from benefit_stress_lab.calculations import OUTCOME_BETTER, OUTCOME_UNCHANGED, OUTCOME_WORSE
 
-# Display order for segment dimensions; anything else is sorted alphabetically.
 DIMENSION_ORDER: dict[str, tuple[str, ...]] = {
     "salary_band": config.SALARY_BAND_LABELS,
     "coverage_tier": config.COVERAGE_TIERS,
@@ -39,7 +31,6 @@ SEGMENT_METRICS: tuple[str, ...] = (
 
 
 def plan_names_in_order(rows: pd.DataFrame) -> list[str]:
-    """Plan names in evaluation order; the first is the baseline."""
     return list(dict.fromkeys(rows["plan_name"]))
 
 
@@ -52,7 +43,6 @@ def _with_outcome_flags(rows: pd.DataFrame) -> pd.DataFrame:
 
 
 def plan_summary(rows: pd.DataFrame) -> pd.DataFrame:
-    """One row per plan, indexed by plan name, with comparisons to the baseline."""
     names = plan_names_in_order(rows)
     summary = (
         _with_outcome_flags(rows)
@@ -114,7 +104,6 @@ def _sort_segments(
 def segment_summary(
     rows: pd.DataFrame, by: Sequence[str], min_group_size: int = config.DEFAULT_MIN_GROUP_SIZE
 ) -> pd.DataFrame:
-    """Plan × segment results. Metrics are NaN where a segment is below ``min_group_size``."""
     by = list(by)
     segments = (
         _with_outcome_flags(rows)
@@ -146,7 +135,6 @@ def segment_summary(
 
 
 def describe_segment(salary_band: str, coverage_tier: str) -> str:
-    """Plain-language label, e.g. ``Family coverage, earning below 40k``."""
     if salary_band.startswith("<"):
         pay = f"earning below {salary_band[1:]}"
     elif salary_band.endswith("+"):
@@ -160,11 +148,6 @@ def describe_segment(salary_band: str, coverage_tier: str) -> str:
 def most_affected_segment(
     rows: pd.DataFrame, plan_name: str, min_group_size: int = config.DEFAULT_MIN_GROUP_SIZE
 ) -> dict[str, object] | None:
-    """Salary band × coverage tier segment with the largest median rise in burden % of salary.
-
-    Only segments at or above the minimum group size are considered. Returns
-    ``None`` when no eligible segment has a positive median change.
-    """
     by = ["salary_band", "coverage_tier"]
     segments = segment_summary(rows, by, min_group_size)
     candidates = segments[(segments["plan_name"] == plan_name) & ~segments["suppressed"]]

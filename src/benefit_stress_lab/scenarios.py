@@ -1,10 +1,3 @@
-"""Stress assumptions, the end-to-end analysis run, and sensitivity analysis.
-
-Stress is applied to the workforce once, then every plan is evaluated on that
-same stressed workforce, so plan differences are never caused by different
-utilisation assumptions.
-"""
-
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
@@ -36,11 +29,6 @@ DEFAULT_CONTRIBUTION_SWEEP: tuple[float, ...] = tuple(range(50, 101, 5))
 
 
 def _select(rng: np.random.Generator, eligible: np.ndarray, share_pct: float) -> np.ndarray:
-    """Boolean mask choosing ``share_pct`` % of eligible rows.
-
-    Uses a seeded permutation and takes the first k, so a larger share always
-    contains the employees chosen for a smaller share.
-    """
     chosen = np.zeros(len(eligible), dtype=bool)
     candidates = np.flatnonzero(eligible)
     k = int(round(len(candidates) * share_pct / 100))
@@ -51,7 +39,6 @@ def _select(rng: np.random.Generator, eligible: np.ndarray, share_pct: float) ->
 def stress_workforce(
     workforce: pd.DataFrame, assumptions: StressAssumptions, costs: UtilisationCosts
 ) -> pd.DataFrame:
-    """Apply coverage-mix, high-use, cost, and salary stress in that order."""
     df = workforce.copy()
     if assumptions.is_baseline():
         return df
@@ -88,11 +75,6 @@ def stress_workforce(
 
 
 def stress_plan(plan: Plan, assumptions: StressAssumptions) -> Plan:
-    """Scale premiums by the healthcare cost change when that option is selected.
-
-    Deductibles, coinsurance, and maximums stay fixed in money terms, so cost
-    growth shifts a rising share of spending onto employees.
-    """
     change = assumptions.healthcare_cost_change_pct
     if not assumptions.apply_to_premiums or change == 0:
         return plan
@@ -107,8 +89,6 @@ def stress_plan(plan: Plan, assumptions: StressAssumptions) -> Plan:
 
 @dataclass(frozen=True, eq=False)
 class AnalysisResult:
-    """Everything produced by one stress-test run."""
-
     input_plans: tuple[Plan, ...]
     plans: tuple[Plan, ...]
     workforce: pd.DataFrame
@@ -150,7 +130,6 @@ def run_analysis(
     assumptions: StressAssumptions | None = None,
     costs: UtilisationCosts | None = None,
 ) -> AnalysisResult:
-    """Evaluate the current plan and alternatives on one (optionally stressed) workforce."""
     settings = settings or AnalysisSettings()
     assumptions = assumptions or StressAssumptions()
     costs = costs or UtilisationCosts()
@@ -180,7 +159,6 @@ def run_analysis(
 
 
 def _evaluate_against_baseline(result: AnalysisResult, plan: Plan) -> pd.Series:
-    """Summary row for an extra plan, under the same stressed workforce and baseline."""
     rows = evaluate_plans(
         result.workforce,
         [result.plans[0], stress_plan(plan, result.assumptions)],
@@ -205,7 +183,6 @@ _VARIANT_COLUMNS = (
 def compare_variants(
     result: AnalysisResult, proposal_name: str, variants: Iterable[Mitigation]
 ) -> pd.DataFrame:
-    """Evaluate mitigations of one proposal alongside the original proposal."""
     proposal = result.summary.loc[proposal_name]
     records = [
         {
@@ -251,10 +228,6 @@ def sensitivity_grid(
     cost_changes: Sequence[float] = DEFAULT_COST_CHANGES,
     high_use_shifts: Sequence[float] = DEFAULT_HIGH_USE_SHIFTS,
 ) -> pd.DataFrame:
-    """Rerun the comparison over a grid of cost-change and high-use-shift assumptions.
-
-    Other stress settings (salary growth, coverage shift) are held at their base values.
-    """
     settings = settings or AnalysisSettings()
     base = (base_assumptions or StressAssumptions()).model_dump()
     records = []
@@ -289,10 +262,6 @@ def contribution_sweep(
     plan_name: str,
     contribution_pcts: Sequence[float] = DEFAULT_CONTRIBUTION_SWEEP,
 ) -> pd.DataFrame:
-    """Employer saving and affordability as one plan's employer contribution varies.
-
-    The same percentage is applied to every coverage tier; any salary subsidy is kept.
-    """
     plan = result.input_plan(plan_name)
     records = []
     for pct in contribution_pcts:

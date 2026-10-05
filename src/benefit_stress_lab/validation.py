@@ -1,17 +1,3 @@
-"""Validation for uploaded workforce files.
-
-Documented rules:
-
-* Required columns must be present and complete; the file must contain rows.
-* Duplicate ``employee_id`` values are rejected, never silently dropped.
-* Salaries must be positive and allowed costs non-negative.
-* Coverage and utilisation tiers must be supported values. Case, spaces, and
-  hyphens are normalised (``Employee-Only`` becomes ``employee_only``).
-* ``salary_band`` is always recomputed from salary so bands stay consistent.
-* Unrecognised columns are dropped with a warning. The model does not need them,
-  and they may contain identifying or sensitive information.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -37,8 +23,6 @@ _EXAMPLES_SHOWN = 5
 
 @dataclass
 class ValidationReport:
-    """Outcome of validating a workforce. ``data`` is set only when there are no errors."""
-
     data: pd.DataFrame | None = None
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
@@ -49,7 +33,6 @@ class ValidationReport:
 
 
 def _csv_lines(mask: pd.Series) -> str:
-    """Spreadsheet-style line numbers (header is line 1) for the first few flagged rows."""
     lines = [str(i + 2) for i in mask[mask].index[:_EXAMPLES_SHOWN]]
     more = " …" if mask.sum() > _EXAMPLES_SHOWN else ""
     return ", ".join(lines) + more
@@ -85,7 +68,6 @@ def _check_numeric(
 
 
 def validate_workforce(raw: pd.DataFrame | None) -> ValidationReport:
-    """Validate and clean a workforce table. Never modifies ``raw``."""
     report = ValidationReport()
     if raw is None or raw.shape[0] == 0:
         report.errors.append("The file contains no employee rows.")
@@ -206,7 +188,6 @@ def validate_workforce(raw: pd.DataFrame | None) -> ValidationReport:
 
 
 def read_workforce_csv(source: str | IO) -> ValidationReport:
-    """Read a CSV and validate it, turning parse failures into readable errors."""
     try:
         raw = pd.read_csv(source, dtype={"employee_id": "string"})
     except pd.errors.EmptyDataError:
@@ -217,7 +198,6 @@ def read_workforce_csv(source: str | IO) -> ValidationReport:
 
 
 def workforce_template() -> pd.DataFrame:
-    """A small example of the upload layout, using synthetic values only."""
     return pd.DataFrame(
         {
             "employee_id": ["EMP-0001", "EMP-0002", "EMP-0003"],
@@ -233,7 +213,6 @@ def workforce_template() -> pd.DataFrame:
 
 
 def summarise_workforce(workforce: pd.DataFrame) -> dict[str, object]:
-    """Headline facts shown after a workforce is generated or uploaded."""
     salary = workforce["annual_salary"]
     return {
         "headcount": len(workforce),

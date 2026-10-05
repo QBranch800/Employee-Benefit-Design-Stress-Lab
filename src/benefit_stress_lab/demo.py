@@ -1,9 +1,3 @@
-"""Demonstration plans from the project specification (sections 6 and 26).
-
-Family deductibles and out-of-pocket maximums are twice the individual values:
-a labelled assumption, because the specification gives individual values only.
-"""
-
 from __future__ import annotations
 
 from benefit_stress_lab.schemas import Plan, SalarySubsidy, TierRules
@@ -54,11 +48,6 @@ def proposed_plan(name: str = "Proposed plan") -> Plan:
 
 
 def scenario_a_balanced() -> Plan:
-    """A: a leaner design priced 6% lower; the employer keeps its 80% share.
-
-    Higher deductibles are partly offset by lower employee premium contributions,
-    so many low users are better off and the share above the threshold barely moves.
-    """
     return (
         current_plan()
         .with_tier_changes(
@@ -70,12 +59,10 @@ def scenario_a_balanced() -> Plan:
 
 
 def scenario_b_hidden_problem() -> Plan:
-    """B: the specification's proposal. Averages look tolerable; low-paid families are hit hard."""
     return proposed_plan("B: Proposed cost shift")
 
 
 def scenario_c_targeted_mitigation() -> Plan:
-    """C: B plus a 90% employer contribution for employees earning below 60k."""
     plan = proposed_plan("C: B + low-pay subsidy")
     return plan.model_copy(
         update={"salary_subsidy": SalarySubsidy(salary_below=60_000, employer_contribution_pct=90)}

@@ -1,17 +1,9 @@
-"""Fixed vocabulary and default settings shared across the engine and the app.
-
-Everything a user might reasonably want to change (thresholds, costs, mixes) is a
-default here and an editable field elsewhere. Nothing in this file is a legal,
-regulatory, or clinical standard.
-"""
-
 from __future__ import annotations
 
 import math
 
 MODEL_VERSION = "0.1.0"
 
-# Coverage tiers supported by the MVP. Richer tiers (employee + spouse, etc.) are V2.
 COVERAGE_TIERS: tuple[str, ...] = ("employee_only", "family")
 COVERAGE_TIER_LABELS: dict[str, str] = {
     "employee_only": "Employee only",
@@ -20,7 +12,6 @@ COVERAGE_TIER_LABELS: dict[str, str] = {
 
 UTILISATION_TIERS: tuple[str, ...] = ("low", "medium", "high")
 
-# Salary bands as (label, lower bound inclusive, upper bound exclusive).
 SALARY_BANDS: tuple[tuple[str, float, float], ...] = (
     ("<40k", 0, 40_000),
     ("40k-59k", 40_000, 60_000),
@@ -35,7 +26,6 @@ REGIONS: tuple[str, ...] = ("Region A", "Region B", "Region C")
 
 NOT_PROVIDED = "Not provided"
 
-# Analysis defaults. All are scenario parameters, not standards.
 DEFAULT_AFFORDABILITY_THRESHOLD_PCT = 10.0
 DEFAULT_UNCHANGED_TOLERANCE = 50.0
 DEFAULT_MIN_GROUP_SIZE = 10
@@ -48,7 +38,6 @@ CURRENCIES: dict[str, str] = {"USD": "$", "GBP": "£", "EUR": "€", "CAD": "C$"
 
 
 def salary_band_for(salary: float) -> str:
-    """Return the salary-band label for a single salary."""
     for label, lower, upper in SALARY_BANDS:
         if lower <= salary < upper:
             return label

@@ -1,8 +1,4 @@
-# Streamlit settings for Benefit Design Stress Lab.
-# Run from the project root so this file is picked up: streamlit run app/app.py
-
 [server]
-# Serves app/static/, so the bundled Geist fonts load without a third-party request.
 enableStaticServing = true
 
 [browser]
@@ -14,8 +10,6 @@ headingFont = "Geist, sans-serif"
 codeFont = "'Geist Mono', monospace"
 baseRadius = "small"
 
-# Colours follow the Zurich Insurance palette (Zurich blue and navy); the app uses the
-# colours only, not the Zurich name or logo. Keep in sync with app/theme.py.
 [theme.light]
 primaryColor = "#2167AE"
 backgroundColor = "#FFFFFF"
@@ -38,9 +32,6 @@ borderColor = "#2C3B5E"
 dataframeHeaderBackgroundColor = "#1A2747"
 chartCategoricalColors = ["#8C96AA", "#4F8FD0", "#D8743A", "#27A06F"]
 
-# Geist and Geist Mono v1.7.2 (variable weight 100-900) from the official release at
-# https://github.com/vercel/geist-font, licensed under the SIL Open Font License 1.1
-# (app/static/fonts/OFL.txt).
 [[theme.fontFaces]]
 family = "Geist"
 url = "app/static/fonts/Geist-Variable.woff2"

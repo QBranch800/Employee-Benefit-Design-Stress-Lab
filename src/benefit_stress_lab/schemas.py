@@ -1,9 +1,3 @@
-"""Validated input models for plans, utilisation costs, and analysis settings.
-
-Pydantic rejects invalid inputs at construction time, so the calculation engine
-never has to defend against negative premiums or percentages above 100.
-"""
-
 from __future__ import annotations
 
 from typing import Literal
@@ -17,8 +11,6 @@ CoverageTier = Literal["employee_only", "family"]
 
 
 class TierRules(BaseModel):
-    """Cost-sharing rules for one coverage tier of one plan."""
-
     model_config = ConfigDict(extra="forbid")
 
     annual_premium: float = Field(
@@ -58,8 +50,6 @@ class TierRules(BaseModel):
 
 
 class SalarySubsidy(BaseModel):
-    """Higher employer contribution for employees earning below a salary threshold."""
-
     model_config = ConfigDict(extra="forbid")
 
     salary_below: float = Field(
@@ -76,8 +66,6 @@ class SalarySubsidy(BaseModel):
 
 
 class Plan(BaseModel):
-    """A complete plan design: one set of rules per coverage tier."""
-
     model_config = ConfigDict(extra="forbid")
 
     name: str = Field(min_length=1, max_length=40)
@@ -95,21 +83,15 @@ class Plan(BaseModel):
         return self
 
     def renamed(self, name: str) -> Plan:
-        """Return a deep copy of this plan with a new name."""
         return self.model_copy(update={"name": name}, deep=True)
 
     def with_tier_changes(self, **changes_by_tier: dict) -> Plan:
-        """Return a validated copy with some tier fields changed.
-
-        Example: ``plan.with_tier_changes(family={"employer_contribution_pct": 80})``.
-        """
         data = self.model_dump()
         for tier, changes in changes_by_tier.items():
             data["tiers"][tier].update(changes)
         return Plan.model_validate(data)
 
     def to_frame(self) -> pd.DataFrame:
-        """Plan in the tabular 'plan schema' layout: one row per coverage tier."""
         rows = []
         for tier in config.COVERAGE_TIERS:
             rules = self.tiers[tier]
@@ -132,12 +114,6 @@ class Plan(BaseModel):
 
 
 class UtilisationCosts(BaseModel):
-    """Annual allowed healthcare cost assumed for each utilisation scenario.
-
-    These are labelled assumptions for an employee-only member, not forecasts.
-    Family coverage multiplies them by ``family_multiplier``.
-    """
-
     model_config = ConfigDict(extra="forbid")
 
     low: float = Field(default=600, ge=0)
@@ -157,8 +133,6 @@ class UtilisationCosts(BaseModel):
 
 
 class AnalysisSettings(BaseModel):
-    """User-selected analytical choices. Every value is displayed with the results."""
-
     model_config = ConfigDict(extra="forbid")
 
     currency: str = Field(default="USD")
@@ -176,12 +150,6 @@ class AnalysisSettings(BaseModel):
 
 
 class StressAssumptions(BaseModel):
-    """Changes applied to the workforce before every plan is evaluated.
-
-    The same stressed workforce is used for every plan, so differences between
-    plans are caused by plan design only.
-    """
-
     model_config = ConfigDict(extra="forbid")
 
     healthcare_cost_change_pct: float = Field(default=0, ge=-50, le=200)
@@ -213,7 +181,6 @@ class StressAssumptions(BaseModel):
 
 
 def format_validation_error(error: ValidationError) -> list[str]:
-    """Turn a Pydantic error into short, user-readable messages."""
     messages = []
     for item in error.errors():
         location = " → ".join(str(part) for part in item["loc"] if part != "tiers")
