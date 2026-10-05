@@ -187,6 +187,6 @@ One of these, done properly, is the planned next step:
 
 Copyright © 2026 QBranch800. All rights reserved.
 
-This repository is published for portfolio review. You may read the code and run it locally to evaluate it. Copying, modifying, redistributing, or reusing any part of it requires prior written permission. See [LICENSE](LICENSE).
+You may download, install, run, and test this software for personal, educational, and evaluation purposes, and you may inspect and experiment with the source code locally. You may not claim it as your own, redistribute or sell it, or use it in another publicly distributed or commercial product without prior written permission. The full terms are in [LICENSE](LICENSE).
 
 The bundled Geist typeface is a third-party work licensed under the SIL Open Font License; see `app/static/fonts/OFL.txt`.
