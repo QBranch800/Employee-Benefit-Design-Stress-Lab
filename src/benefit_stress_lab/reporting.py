@@ -1,9 +1,3 @@
-"""Aggregate exports and a one-page advisory summary.
-
-Exports never contain row-level employee data. The app displays the same
-tables these functions export, so displayed and exported values always match.
-"""
-
 from __future__ import annotations
 
 import io
@@ -57,14 +51,12 @@ LIMITATIONS: tuple[str, ...] = (
 
 
 def plan_table(result: AnalysisResult) -> pd.DataFrame:
-    """Per-plan results with readable column names, for display and export."""
     table = result.summary[list(PLAN_TABLE_COLUMNS)].rename(columns=PLAN_TABLE_COLUMNS)
     table.index.name = "Plan"
     return table
 
 
 def segment_table(result: AnalysisResult) -> pd.DataFrame:
-    """Segment results by salary band, coverage tier, and both, with suppression applied."""
     frames = []
     for by in SEGMENT_DIMENSIONS:
         seg = result.segments(list(by))
@@ -78,7 +70,6 @@ def segment_table(result: AnalysisResult) -> pd.DataFrame:
 
 
 def assumptions_table(result: AnalysisResult) -> pd.DataFrame:
-    """Every setting and assumption behind the results, as parameter/value rows."""
     s, a, c = result.settings, result.assumptions, result.costs
     rows = [
         ("Model version", result.model_version),
@@ -108,7 +99,6 @@ def assumptions_table(result: AnalysisResult) -> pd.DataFrame:
 
 
 def plans_table(result: AnalysisResult) -> pd.DataFrame:
-    """Plan definitions as entered (before any premium stress)."""
     return pd.concat([plan.to_frame() for plan in result.input_plans], ignore_index=True)
 
 
@@ -117,7 +107,6 @@ def to_csv_bytes(frame: pd.DataFrame, *, index: bool = False) -> bytes:
 
 
 def export_bundle(result: AnalysisResult, mitigation_table: pd.DataFrame | None = None) -> bytes:
-    """ZIP of every aggregate table. No row-level employee data is included."""
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("plan_summary.csv", to_csv_bytes(plan_table(result), index=True))
@@ -142,7 +131,6 @@ def summary_markdown(
     findings: list[str],
     mitigation_table: pd.DataFrame | None = None,
 ) -> str:
-    """One-page advisory summary comparing one alternative with the baseline."""
     s = result.settings
     sym = s.currency_symbol
     base = result.summary.iloc[0]

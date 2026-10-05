@@ -10,7 +10,7 @@ SETTINGS = AnalysisSettings(savings_target_pct=5, material_increase_pp=2)
 @pytest.mark.parametrize(
     "saving, change, expected",
     [
-        (5.0, 2.0, rec.LABEL_BALANCED),  # both exactly at their limits
+        (5.0, 2.0, rec.LABEL_BALANCED),
         (10, -1, rec.LABEL_BALANCED),
         (10, 2.1, rec.LABEL_RISK),
         (4.9, 0, rec.LABEL_SHORTFALL),

@@ -27,8 +27,6 @@ def workforce() -> pd.DataFrame:
 
 @pytest.fixture
 def make_workforce() -> Callable[[list[dict]], pd.DataFrame]:
-    """Build a small workforce from partial rows; unspecified fields get neutral defaults."""
-
     def build(rows: list[dict]) -> pd.DataFrame:
         records = []
         for i, row in enumerate(rows, start=1):

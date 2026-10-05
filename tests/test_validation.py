@@ -139,7 +139,7 @@ class TestPlanSchemas:
             {"employer_contribution_pct": -1},
             {"coinsurance_pct": 120},
             {"deductible": -100},
-            {"out_of_pocket_max": 400},  # below the deductible
+            {"out_of_pocket_max": 400},
         ],
     )
     def test_invalid_tier_rules_are_rejected(self, overrides):

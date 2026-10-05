@@ -4,7 +4,6 @@ import pytest
 from benefit_stress_lab import plan_rules
 from benefit_stress_lab.calculations import is_above_threshold
 
-# Current plan, employee-only tier: deductible 500, coinsurance 20%, OOP max 3,000.
 DED, COINS, OOP_MAX = 500, 20, 3_000
 
 
@@ -23,11 +22,9 @@ class TestOutOfPocket:
         assert oop(500) == 500
 
     def test_coinsurance_applies_only_after_deductible(self):
-        # 500 deductible + 20% of the remaining 2,500.
         assert oop(3_000) == pytest.approx(1_000)
 
     def test_reaching_the_maximum_exactly(self):
-        # 500 + 20% × 12,500 = 3,000.
         assert oop(13_000) == pytest.approx(3_000)
 
     def test_never_exceeds_the_maximum(self):

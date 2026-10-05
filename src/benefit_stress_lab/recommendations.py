@@ -1,9 +1,3 @@
-"""Transparent, rule-based scenario labels, candidate mitigations, and findings text.
-
-Nothing here chooses a plan. Labels follow the rules in METHODOLOGY.md using
-user-configured thresholds, and every mitigation is recalculated, not asserted.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -32,7 +26,6 @@ DEFAULT_LOW_PAY_THRESHOLD = 60_000
 def label_scenario(
     employer_saving_pct: float, above_threshold_change_pp: float, settings: AnalysisSettings
 ) -> str:
-    """Apply the two-question labelling rule."""
     savings_met = employer_saving_pct >= settings.savings_target_pct - EPSILON
     material_increase = above_threshold_change_pp > settings.material_increase_pp + EPSILON
     if savings_met:
@@ -56,7 +49,6 @@ def label_rationale(
 
 
 def add_labels(summary: pd.DataFrame, settings: AnalysisSettings) -> pd.DataFrame:
-    """Add ``label`` and ``label_rationale`` columns; the first row is the baseline."""
     labelled = summary.copy()
     labels, reasons = [LABEL_BASELINE], ["Reference plan for all comparisons."]
     for _, row in labelled.iloc[1:].iterrows():
@@ -70,8 +62,6 @@ def add_labels(summary: pd.DataFrame, settings: AnalysisSettings) -> pd.DataFram
 
 @dataclass(frozen=True)
 class Mitigation:
-    """A candidate adjustment to a proposal, as a complete alternative plan."""
-
     key: str
     title: str
     description: str
@@ -96,7 +86,6 @@ def candidate_mitigations(
     low_pay_threshold: float = DEFAULT_LOW_PAY_THRESHOLD,
     currency_symbol: str = "$",
 ) -> list[Mitigation]:
-    """Adjustments that soften a proposal, built only where they would change something."""
     tiers = config.COVERAGE_TIERS
     cur = current.tiers
     prop = proposal.tiers
@@ -220,16 +209,6 @@ def candidate_mitigations(
 
 
 def best_mitigation(table: pd.DataFrame, settings: AnalysisSettings) -> pd.Series | None:
-    """Pick a mitigation from an evaluated table using a stated rule.
-
-    1. Among options labelled Balanced, take the largest employer saving.
-    2. Otherwise, among options meeting the savings target, take the lowest share
-       above the threshold.
-    3. Otherwise, take the option with the lowest share above the threshold.
-
-    Only options that reduce the share above the threshold compared with the
-    original proposal are eligible.
-    """
     proposal = table.loc[table["key"] == PROPOSAL_KEY].iloc[0]
     options = table.loc[
         (table["key"] != PROPOSAL_KEY)
@@ -250,7 +229,6 @@ def best_mitigation(table: pd.DataFrame, settings: AnalysisSettings) -> pd.Serie
 def findings(
     result: AnalysisResult, plan_name: str, mitigation_table: pd.DataFrame | None = None
 ) -> list[str]:
-    """Plain-language findings for one alternative compared with the baseline."""
     settings = result.settings
     summary = result.summary
     base = summary.iloc[0]

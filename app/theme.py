@@ -1,14 +1,3 @@
-"""Colour and type tokens for the app's charts, one set per light/dark mode.
-
-Hues follow the Zurich Insurance palette (Zurich blue and navy), matching
-.streamlit/config.toml. Chart colours are assigned by the job they do: plans
-are categorical identity (the current plan is a neutral reference), better and
-worse outcomes are a diverging pair around a neutral midpoint, and magnitudes
-use a single-hue sequential ramp. The plan colours pass colour-blindness
-checks for three series; every chart also has direct labels or a data table,
-so no value depends on colour alone.
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -21,21 +10,21 @@ FONT_FAMILY = "Geist, sans-serif"
 @dataclass(frozen=True)
 class Palette:
     mode: str
-    surface: str  # app background; also the 2px gap between touching marks
+    surface: str
     text: str
     text_secondary: str
     muted: str
     grid: str
     axis: str
-    primary: str  # single-series marks
-    baseline: str  # the current plan: a neutral reference
-    context: str  # de-emphasised marks
-    plans: tuple[str, str, str]  # alternatives 1-3, assigned in order, never cycled
+    primary: str
+    baseline: str
+    context: str
+    plans: tuple[str, str, str]
     better: str
     unchanged: str
     worse: str
-    diverging_scale: tuple[tuple[float, str], ...]  # better → neutral → worse
-    sequential_scale: tuple[tuple[float, str], ...]  # low → high magnitude
+    diverging_scale: tuple[tuple[float, str], ...]
+    sequential_scale: tuple[tuple[float, str], ...]
 
 
 LIGHT = Palette(
@@ -78,9 +67,8 @@ DARK = Palette(
 
 
 def palette() -> Palette:
-    """Tokens for the viewer's current Streamlit theme (light when unknown)."""
     try:
         mode = st.context.theme.type
-    except Exception:  # outside a running app, e.g. in tests
+    except Exception:
         mode = None
     return DARK if mode == "dark" else LIGHT

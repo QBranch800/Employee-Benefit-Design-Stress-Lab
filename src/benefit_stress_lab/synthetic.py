@@ -1,13 +1,3 @@
-"""Reproducible synthetic workforce generator.
-
-Every distribution here is an explicit, labelled assumption chosen to look
-plausible. None is calibrated to a real employer, country, or year. The same
-settings and seed always produce the same workforce.
-
-Healthcare use is assigned independently of age, salary, and region. The model
-deliberately does not infer health from demographic characteristics.
-"""
-
 from __future__ import annotations
 
 import numpy as np
@@ -28,7 +18,6 @@ WORKFORCE_COLUMNS: tuple[str, ...] = (
     "annual_allowed_cost",
 )
 
-# Assumption: share of the workforce in each age band.
 AGE_BAND_SHARES: dict[str, float] = {
     "18-24": 0.08,
     "25-34": 0.27,
@@ -37,8 +26,6 @@ AGE_BAND_SHARES: dict[str, float] = {
     "55-64": 0.14,
     "65+": 0.02,
 }
-# Assumption: relative likelihood of choosing family coverage by age band. Rescaled
-# so the overall family share approximately matches the user's setting.
 FAMILY_LIKELIHOOD_BY_AGE: dict[str, float] = {
     "18-24": 0.3,
     "25-34": 0.9,
@@ -49,14 +36,10 @@ FAMILY_LIKELIHOOD_BY_AGE: dict[str, float] = {
 }
 REGION_SHARES: dict[str, float] = {"Region A": 0.5, "Region B": 0.3, "Region C": 0.2}
 
-# Spread of allowed cost around each utilisation tier's amount (lognormal sigma).
-# The multiplier has mean 1, so each tier's average equals its configured amount.
 WITHIN_TIER_SIGMA = 0.35
 
 
 class WorkforceSettings(BaseModel):
-    """Inputs to the synthetic generator. All values are assumptions."""
-
     model_config = ConfigDict(extra="forbid")
 
     headcount: int = Field(default=500, ge=10, le=50_000)
@@ -93,7 +76,6 @@ class WorkforceSettings(BaseModel):
 
 
 def _exact_counts(shares: dict[str, float], total: int) -> dict[str, int]:
-    """Split ``total`` into whole counts matching ``shares`` (largest remainder)."""
     raw = {key: share * total for key, share in shares.items()}
     counts = {key: int(np.floor(value)) for key, value in raw.items()}
     shortfall = total - sum(counts.values())
@@ -107,7 +89,6 @@ def generate_workforce(
     settings: WorkforceSettings | None = None,
     costs: UtilisationCosts | None = None,
 ) -> pd.DataFrame:
-    """Generate a synthetic workforce matching the workforce schema."""
     settings = settings or WorkforceSettings()
     costs = costs or UtilisationCosts()
     rng = np.random.default_rng(settings.seed)

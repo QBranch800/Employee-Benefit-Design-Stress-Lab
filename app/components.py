@@ -1,9 +1,3 @@
-"""Session state, navigation, and layout helpers shared by every page.
-
-Pages never calculate anything themselves: they collect inputs, call the
-benefit_stress_lab engine, and display what it returns.
-"""
-
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
@@ -52,14 +46,12 @@ def _defaults() -> dict[str, Any]:
 
 
 def init_state() -> None:
-    """Fill in any missing session keys. Safe to call on every page."""
     for key, value in _defaults().items():
         if key not in st.session_state:
             st.session_state[key] = value
 
 
 def demo_state() -> dict[str, Any]:
-    """Inputs for the demonstration: specification plans A, B, C on 500 synthetic employees."""
     settings, costs = WorkforceSettings(), UtilisationCosts()
     return {
         "workforce": generate_workforce(settings, costs),
@@ -75,12 +67,10 @@ def demo_state() -> dict[str, Any]:
 
 
 def inputs_changed() -> None:
-    """Record that an input changed, so an earlier analysis is shown as out of date."""
     st.session_state.inputs_version += 1
 
 
 def reset_forms() -> None:
-    """Give form widgets fresh keys so they show values replaced programmatically."""
     st.session_state.form_rev += 1
 
 
@@ -92,7 +82,6 @@ def load_demo() -> None:
 
 
 def run_and_store() -> AnalysisResult:
-    """Run the analysis on the current inputs and keep the result in the session."""
     state = st.session_state
     result = run_analysis(
         state.workforce,
@@ -115,7 +104,6 @@ def analysis_is_stale() -> bool:
 
 
 def cached(kind: str, plan_name: str, compute: Callable[[], Any]) -> Any:
-    """Compute once per analysis run, plan, and kind of result."""
     key = (st.session_state.run_id, kind, plan_name)
     cache = st.session_state.result_cache
     if key not in cache:
@@ -125,10 +113,6 @@ def cached(kind: str, plan_name: str, compute: Callable[[], Any]) -> Any:
 
 def all_plans() -> list[Plan]:
     return [st.session_state.current_plan, *st.session_state.alternatives]
-
-
-# Navigation. Pages are registered by app.py; when a page runs on its own (in
-# tests) there is nothing to link to, and the helpers quietly do nothing.
 
 
 def register_pages(pages: dict[str, Any]) -> None:
@@ -216,13 +200,11 @@ _ASSESSMENT_STYLE = {
 
 
 def assessment(label: str, rationale: str) -> None:
-    """Assessment label with an icon and its reasoning; never colour alone."""
     box, icon = _ASSESSMENT_STYLE.get(label, (st.info, ":material/info:"))
     box(f"**{label}.** {rationale}", icon=icon)
 
 
 def delta_money(value: float, symbol: str) -> str:
-    """Signed money for st.metric, which reads direction from a leading ASCII '-'."""
     rounded = round(value)
     sign = "-" if rounded < 0 else "+" if rounded > 0 else ""
     return f"{sign}{symbol}{abs(rounded):,}"
@@ -244,7 +226,6 @@ def display_frame(
     pp: Iterable[str] = (),
     whole: Iterable[str] = (),
 ) -> pd.DataFrame:
-    """Copy of ``frame`` with numbers formatted as display text (blank cells stay '—')."""
     shown = frame.copy()
     for col in money:
         shown[col] = [formatting.money(v, symbol) for v in frame[col]]
@@ -260,6 +241,5 @@ def display_frame(
 
 
 def table_view(frame: pd.DataFrame, label: str = "Show the data behind this chart") -> None:
-    """The table twin of a chart, so no value depends on colour or hover alone."""
     with st.expander(label, icon=":material/table:"):
         st.dataframe(frame, hide_index=True, width="stretch")
