@@ -91,6 +91,7 @@ def stress_plan(plan: Plan, assumptions: StressAssumptions) -> Plan:
 class AnalysisResult:
     input_plans: tuple[Plan, ...]
     plans: tuple[Plan, ...]
+    input_workforce: pd.DataFrame
     workforce: pd.DataFrame
     rows: pd.DataFrame
     summary: pd.DataFrame
@@ -149,6 +150,7 @@ def run_analysis(
     return AnalysisResult(
         input_plans=input_plans,
         plans=plans,
+        input_workforce=workforce,
         workforce=stressed,
         rows=rows,
         summary=summary,

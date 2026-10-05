@@ -1,4 +1,5 @@
 import io
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -188,3 +189,18 @@ class TestSyntheticWorkforce:
     def test_utilisation_shares_must_sum_to_one(self):
         with pytest.raises(ValidationError):
             WorkforceSettings(low_use_share=0.5, medium_use_share=0.5, high_use_share=0.5)
+
+
+class TestBundledData:
+    ROOT = Path(__file__).resolve().parents[1] / "data"
+
+    def test_example_workforce_is_valid(self):
+        report = read_workforce_csv(self.ROOT / "examples" / "synthetic_workforce.csv")
+        assert report.ok, report.errors
+        assert not report.warnings
+        assert len(report.data) == 500
+
+    def test_upload_template_matches_the_code(self):
+        report = read_workforce_csv(self.ROOT / "templates" / "workforce_upload_template.csv")
+        assert report.ok, report.errors
+        pd.testing.assert_frame_equal(report.data, validate_workforce(workforce_template()).data)

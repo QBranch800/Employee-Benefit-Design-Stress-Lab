@@ -199,21 +199,31 @@ _ASSESSMENT_STYLE = {
 }
 
 
+def escape(text: str) -> str:
+    return text.replace("$", "\\$")
+
+
 def assessment(label: str, rationale: str) -> None:
     box, icon = _ASSESSMENT_STYLE.get(label, (st.info, ":material/info:"))
-    box(f"**{label}.** {rationale}", icon=icon)
+    box(escape(f"**{label}.** {rationale}"), icon=icon)
 
 
-def delta_money(value: float, symbol: str) -> str:
+def delta_money(value: float, symbol: str) -> str | None:
     rounded = round(value)
-    sign = "-" if rounded < 0 else "+" if rounded > 0 else ""
-    return f"{sign}{symbol}{abs(rounded):,}"
+    if rounded == 0:
+        return None
+    return f"{'-' if rounded < 0 else '+'}{symbol}{abs(rounded):,}"
 
 
-def delta_pp(value: float) -> str:
+def delta_pp(value: float) -> str | None:
     rounded = round(value, 1)
-    sign = "-" if rounded < 0 else "+" if rounded > 0 else ""
-    return f"{sign}{abs(rounded):.1f} pp"
+    if rounded == 0:
+        return None
+    return f"{'-' if rounded < 0 else '+'}{abs(rounded):.1f} pp"
+
+
+def plot(figure: Any) -> None:
+    st.plotly_chart(figure, theme=None, config={"displayModeBar": False})
 
 
 def display_frame(
@@ -242,4 +252,10 @@ def display_frame(
 
 def table_view(frame: pd.DataFrame, label: str = "Show the data behind this chart") -> None:
     with st.expander(label, icon=":material/table:"):
-        st.dataframe(frame, hide_index=True, width="stretch")
+        st.dataframe(frame, hide_index=True, width="stretch", height="content")
+
+
+def summary_table(frame: pd.DataFrame) -> None:
+    shown = frame.astype(str).map(escape)
+    shown.columns = [escape(str(column)) for column in shown.columns]
+    st.table(shown, border="horizontal", hide_index=True)

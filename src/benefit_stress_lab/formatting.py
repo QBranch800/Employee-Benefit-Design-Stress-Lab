@@ -18,6 +18,18 @@ def money(value: float | None, symbol: str = "$", *, signed: bool = False) -> st
     return f"{sign}{symbol}{abs(rounded):,}"
 
 
+def compact_money(value: float | None, symbol: str = "$") -> str:
+    if _is_missing(value):
+        return MISSING
+    amount = abs(float(value))
+    if amount < 100_000:
+        return money(value, symbol)
+    sign = _MINUS if value < 0 else ""
+    if amount < 999_500:
+        return f"{sign}{symbol}{amount / 1_000:.0f}k"
+    return f"{sign}{symbol}{amount / 1_000_000:.2f}M"
+
+
 def pct(value: float | None, decimals: int = 1, *, signed: bool = False) -> str:
     if _is_missing(value):
         return MISSING
