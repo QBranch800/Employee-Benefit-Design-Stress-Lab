@@ -79,3 +79,11 @@ def test_signed_formatting():
     assert formatting.pp(2.04) == "+2.0 pp"
     assert formatting.pp(-0.01) == "0.0 pp"
     assert formatting.pct(12.345) == "12.3%"
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [(4_833, "$4,833"), (476_220, "$476k"), (2_826_250, "$2.83M"), (-1_049_750, "−$1.05M")],
+)
+def test_compact_money(value, expected):
+    assert formatting.compact_money(value) == expected

@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from benefit_stress_lab.affordability import (
+    burden_quantiles,
     describe_segment,
     most_affected_segment,
     plan_summary,
@@ -111,3 +112,12 @@ def test_zero_baseline_cost_gives_nan_saving(make_workforce, current):
         make_workforce([{}]), [free, current], threshold_pct=10, unchanged_tolerance=50
     )
     assert np.isnan(plan_summary(rows).iloc[1]["employer_saving_pct"])
+
+
+def test_burden_quantiles_match_employee_rows(rows, proposed):
+    quantiles = burden_quantiles(rows)
+    plan_rows = rows[rows["plan_name"] == proposed.name]["burden_pct"]
+    assert list(quantiles.columns) == ["p25", "median", "p75", "p95"]
+    assert quantiles.loc[proposed.name, "median"] == pytest.approx(plan_rows.median())
+    assert quantiles.loc[proposed.name, "p95"] == pytest.approx(plan_rows.quantile(0.95))
+    assert (quantiles["p25"] <= quantiles["median"]).all()

@@ -1,0 +1,19 @@
+Copyright (c) 2026 QBranch800. All rights reserved.
+
+This repository is published for portfolio review. You may read the source code
+and run it locally for the sole purpose of evaluating the author's work.
+
+No other rights are granted. You may not copy, modify, merge, publish,
+distribute, sublicense, sell, or otherwise reuse this software or any part of
+it, including its documentation and design, without prior written permission
+from the copyright holder.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+Third-party components keep their own licences. The Geist and Geist Mono
+typefaces in app/static/fonts are licensed under the SIL Open Font License 1.1
+(app/static/fonts/OFL.txt).

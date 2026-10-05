@@ -1,0 +1,4 @@
+employee_id,annual_salary,salary_band,coverage_tier,age_band,region,utilisation_tier,annual_allowed_cost
+EMP-0001,38000,<40k,family,35-44,Region A,medium,9100
+EMP-0002,64500,60k-79k,employee_only,25-34,Region B,low,600
+EMP-0003,121000,120k+,family,45-54,Region A,high,46800

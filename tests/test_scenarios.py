@@ -135,3 +135,10 @@ def test_contribution_sweep_trades_saving_for_affordability(workforce, current, 
     assert at_70["employer_saving"] == pytest.approx(
         result.summary.loc[proposed.name, "employer_saving"]
     )
+
+
+def test_result_keeps_the_unstressed_workforce(workforce, current, proposed):
+    assumptions = StressAssumptions(healthcare_cost_change_pct=10, high_use_shift_pct=10)
+    result = run_analysis(workforce, current, [proposed], assumptions=assumptions)
+    pd.testing.assert_frame_equal(result.input_workforce, workforce)
+    assert result.workforce["annual_allowed_cost"].sum() > workforce["annual_allowed_cost"].sum()

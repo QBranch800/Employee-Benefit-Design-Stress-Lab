@@ -86,6 +86,17 @@ def plan_summary(rows: pd.DataFrame) -> pd.DataFrame:
     return summary
 
 
+def burden_quantiles(rows: pd.DataFrame) -> pd.DataFrame:
+    quantiles = (
+        rows.groupby("plan_name", sort=False)["burden_pct"]
+        .quantile([0.25, 0.5, 0.75, 0.95])
+        .unstack()
+        .reindex(plan_names_in_order(rows))
+    )
+    quantiles.columns = ["p25", "median", "p75", "p95"]
+    return quantiles
+
+
 def _sort_segments(
     segments: pd.DataFrame, by: Sequence[str], plan_order: list[str]
 ) -> pd.DataFrame:
