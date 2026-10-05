@@ -41,11 +41,11 @@ def add_alternative(plan: Plan) -> None:
 
 def plan_form(plan: Plan, slot: int) -> None:
     rev = state.form_rev
-    with st.form(f"plan-{rev}-{slot}"):
+    with st.form(f"plan-{rev}-{slot}", border=False):
         name = st.text_input("Plan name", value=plan.name, max_chars=40)
         tiers = {}
         for column, tier in zip(
-            st.columns(len(config.COVERAGE_TIERS)), config.COVERAGE_TIERS, strict=True
+            st.columns(len(config.COVERAGE_TIERS), gap="medium"), config.COVERAGE_TIERS, strict=True
         ):
             rules = plan.tiers[tier]
             with column:
@@ -64,27 +64,28 @@ def plan_form(plan: Plan, slot: int) -> None:
                     for field, label, step in FIELDS
                 }
 
-        st.markdown("**Extra support for lower salaries**")
         subsidy = plan.salary_subsidy
-        use_subsidy = st.checkbox(
-            "Give lower-paid employees a higher employer contribution", value=subsidy is not None
-        )
-        left, right = st.columns(2)
-        salary_below = left.number_input(
-            "For salaries below",
-            min_value=1.0,
-            value=float(subsidy.salary_below) if subsidy else 40_000.0,
-            step=1_000.0,
-            format="%.0f",
-        )
-        subsidy_pct = right.number_input(
-            "Employer contribution of at least (%)",
-            min_value=0.0,
-            max_value=100.0,
-            value=float(subsidy.employer_contribution_pct) if subsidy else 90.0,
-            step=1.0,
-            format="%.1f",
-        )
+        with st.expander("Extra support for lower salaries", expanded=subsidy is not None):
+            use_subsidy = st.checkbox(
+                "Give lower-paid employees a higher employer contribution",
+                value=subsidy is not None,
+            )
+            left, right = st.columns(2, gap="medium")
+            salary_below = left.number_input(
+                "For salaries below",
+                min_value=1.0,
+                value=float(subsidy.salary_below) if subsidy else 40_000.0,
+                step=1_000.0,
+                format="%.0f",
+            )
+            subsidy_pct = right.number_input(
+                "Employer contribution of at least (%)",
+                min_value=0.0,
+                max_value=100.0,
+                value=float(subsidy.employer_contribution_pct) if subsidy else 90.0,
+                step=1.0,
+                format="%.1f",
+            )
         save = st.form_submit_button("Save plan", type="primary")
 
     if not save:
@@ -144,13 +145,15 @@ def comparison_table(plans: list[Plan]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-st.title("Plan designer")
-st.write(
-    "Define the current plan and up to three alternatives. The first plan is the current plan: "
-    "every comparison is measured against it. Hover over the question marks for definitions."
+ui.page_header(
+    "Plans",
+    "Define the current plan and up to three alternatives. Every comparison is measured against "
+    "the current plan, which is the first one listed.",
 )
 
 plans = ui.all_plans()
+room = len(state.alternatives) < config.MAX_ALTERNATIVE_PLANS
+
 slot = st.segmented_control(
     "Plan to edit",
     options=list(range(len(plans))),
@@ -159,37 +162,39 @@ slot = st.segmented_control(
     required=True,
     key=f"plan-slot-{state.form_rev}",
 )
-st.caption("Editing the current plan." if slot == 0 else f"Editing alternative {slot}.")
 
-room = len(state.alternatives) < config.MAX_ALTERNATIVE_PLANS
-actions = st.columns(3)
-if actions[0].button(
-    "Copy the current plan as a new alternative",
-    disabled=not room,
-    icon=":material/content_copy:",
-):
-    add_alternative(state.current_plan.renamed(unique_name("Alternative")))
-if actions[1].button("Add the example proposed plan", disabled=not room, icon=":material/add:"):
-    add_alternative(demo.proposed_plan(unique_name("Proposed plan")))
-if actions[2].button("Remove this alternative", disabled=slot == 0, icon=":material/delete:"):
-    state.alternatives = [
-        plan for index, plan in enumerate(state.alternatives) if index != slot - 1
-    ]
-    ui.inputs_changed()
-    ui.reset_forms()
-    st.rerun()
+with st.container(horizontal=True, vertical_alignment="center"):
+    if st.button("Duplicate current plan", disabled=not room, icon=":material/content_copy:"):
+        add_alternative(state.current_plan.renamed(unique_name("Alternative")))
+    if st.button("Add example proposal", disabled=not room, icon=":material/add:"):
+        add_alternative(demo.proposed_plan(unique_name("Proposed plan")))
+    if st.button("Remove this plan", disabled=slot == 0, icon=":material/delete:"):
+        state.alternatives = [
+            plan for index, plan in enumerate(state.alternatives) if index != slot - 1
+        ]
+        ui.inputs_changed()
+        ui.reset_forms()
+        st.rerun()
 if not room:
     st.caption(
         f"The limit is {config.MAX_ALTERNATIVE_PLANS} alternatives. Remove one to add another."
     )
 
-plan_form(plans[slot], slot)
+with ui.card("plan-form"):
+    ui.card_title(
+        "Current plan" if slot == 0 else f"Alternative {slot}",
+        "The employee pays the deductible in full, then the coinsurance share, up to the "
+        "out-of-pocket maximum. Hover over a question mark for a definition.",
+    )
+    plan_form(plans[slot], slot)
 
-st.subheader("Plans side by side")
-st.dataframe(comparison_table(plans), hide_index=True, width="stretch", height="content")
-st.caption(
-    "Simplified rules: the employee pays the deductible in full, then the coinsurance share, up "
-    "to the out-of-pocket maximum. Co-payments, networks, and pharmacy tiers are not modelled."
-)
+with ui.card("plan-compare"):
+    ui.card_title("Side by side")
+    table = comparison_table(plans)
+    ui.html_table(
+        table,
+        numeric=[plan.name for plan in plans],
+        soft=["Coverage tier"],
+    )
 
 ui.page_link("stress_test", "Next: set up the stress test", ":material/arrow_forward:")

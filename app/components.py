@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
+import html
+from collections.abc import Callable, Iterable, Sequence
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import streamlit as st
 
+import theme
 from benefit_stress_lab import demo, formatting
 from benefit_stress_lab.recommendations import (
     LABEL_BALANCED,
@@ -23,6 +27,24 @@ DISCLAIMER = (
     "Educational scenario analysis on synthetic data under simplified plan rules. "
     "Not actuarial, legal, tax, or benefits advice."
 )
+STYLES = Path(__file__).resolve().parent / "styles.css"
+
+BADGES = {
+    LABEL_BALANCED: ("good", "Balanced"),
+    LABEL_RISK: ("warn", "Employee risk increased"),
+    LABEL_SHORTFALL: ("info", "Savings below target"),
+    LABEL_NOT_PREFERRED: ("bad", "Not preferred"),
+    LABEL_BASELINE: ("neutral", "Baseline"),
+}
+
+
+@dataclass(frozen=True)
+class Kpi:
+    label: str
+    value: str
+    delta: str | None = None
+    tone: str = "neutral"
+    note: str | None = None
 
 
 def _defaults() -> dict[str, Any]:
@@ -131,6 +153,141 @@ def switch_to(key: str) -> None:
         st.switch_page(page)
 
 
+def apply_styles() -> None:
+    pal = theme.palette()
+    tokens = {
+        "surface": pal.surface,
+        "card": pal.card,
+        "subtle": pal.subtle,
+        "border": pal.border,
+        "text": pal.text,
+        "secondary": pal.text_secondary,
+        "muted": pal.muted,
+        "accent": pal.accent,
+        "accent-soft": pal.accent_soft,
+        "good": pal.good,
+        "good-soft": pal.good_soft,
+        "warn": pal.warn,
+        "warn-soft": pal.warn_soft,
+        "bad": pal.bad,
+        "bad-soft": pal.bad_soft,
+    }
+    variables = "".join(f"--bsl-{name}:{value};" for name, value in tokens.items())
+    st.html(f"<style>:root{{{variables}}}\n{STYLES.read_text(encoding='utf-8')}</style>")
+
+
+def escape(text: str) -> str:
+    return text.replace("$", "\\$")
+
+
+def page_header(title: str, caption: str | None = None) -> None:
+    body = f'<h1 class="bsl-page-title">{html.escape(title)}</h1>'
+    if caption:
+        body += f'<p class="bsl-page-caption">{html.escape(caption)}</p>'
+    st.html(body)
+
+
+def card(key: str) -> Any:
+    return st.container(key=f"card-{key}")
+
+
+def card_title(title: str, caption: str | None = None) -> None:
+    body = f'<p class="bsl-card-title">{html.escape(title)}</p>'
+    if caption:
+        body += f'<p class="bsl-card-caption">{html.escape(caption)}</p>'
+    st.html(body)
+
+
+def note(text: str, strong: str | None = None) -> None:
+    lead = f"<strong>{html.escape(strong)}</strong> " if strong else ""
+    st.html(f'<div class="bsl-note">{lead}{html.escape(text)}</div>')
+
+
+def footer(extra: str = "") -> None:
+    st.html(f'<div class="bsl-footer">{html.escape(f"{DISCLAIMER} {extra}".strip())}</div>')
+
+
+def tone(change: float, *, lower_is_better: bool = True) -> str:
+    if round(change, 1) == 0:
+        return "neutral"
+    improved = change < 0 if lower_is_better else change > 0
+    return "good" if improved else "bad"
+
+
+def kpis(items: Sequence[Kpi], *, compact: bool = False) -> None:
+    tiles = []
+    for item in items:
+        parts = [
+            f'<span class="bsl-kpi-label">{html.escape(item.label)}</span>',
+            f'<span class="bsl-kpi-value">{html.escape(item.value)}</span>',
+        ]
+        if item.delta:
+            arrow = "↑ " if item.delta.startswith("+") else "↓ " if item.delta[0] in "-−" else ""
+            change = html.escape(f"{arrow}{item.delta}")
+            parts.append(f'<span class="bsl-kpi-delta bsl-{item.tone}">{change}</span>')
+        if item.note:
+            parts.append(f'<span class="bsl-kpi-note">{html.escape(item.note)}</span>')
+        tiles.append(f'<div class="bsl-kpi">{"".join(parts)}</div>')
+    style = "bsl-kpis bsl-compact" if compact else "bsl-kpis"
+    st.html(f'<div class="{style}">{"".join(tiles)}</div>')
+
+
+def badge(label: str) -> str:
+    kind, short = BADGES.get(label, ("neutral", label))
+    return f'<span class="bsl-badge bsl-{kind}">{html.escape(short)}</span>'
+
+
+def callout(eyebrow: str, title: str, text: str, tone: str | None = None) -> None:
+    dot = f'<span class="bsl-dot bsl-{tone}"></span>' if tone else ""
+    st.html(
+        f'<div class="bsl-eyebrow">{html.escape(eyebrow)}</div>'
+        f'<p class="bsl-assessment-title">{dot}{html.escape(title)}</p>'
+        f'<p class="bsl-assessment-text">{html.escape(text)}</p>'
+    )
+
+
+def assessment(label: str, rationale: str) -> None:
+    callout("Assessment", label, rationale, tone=BADGES.get(label, ("neutral", label))[0])
+
+
+def bullet_list(lines: Iterable[str]) -> None:
+    items = "".join(f"<li>{html.escape(line)}</li>" for line in lines)
+    st.html(f'<ul class="bsl-list">{items}</ul>')
+
+
+def html_table(
+    frame: pd.DataFrame,
+    *,
+    numeric: Iterable[str] = (),
+    badges: Iterable[str] = (),
+    soft: Iterable[str] = (),
+    strong: Iterable[str] = (),
+) -> None:
+    numeric, badges, soft, strong = set(numeric), set(badges), set(soft), set(strong)
+
+    def classes(column: str) -> str:
+        names = [
+            name
+            for name, group in (("bsl-num", numeric), ("bsl-soft", soft), ("bsl-strong", strong))
+            if column in group
+        ]
+        return f' class="{" ".join(names)}"' if names else ""
+
+    head = "".join(f"<th{classes(column)}>{html.escape(str(column))}</th>" for column in frame)
+    rows = []
+    for _, row in frame.iterrows():
+        cells = []
+        for column in frame:
+            value = str(row[column])
+            content = badge(value) if column in badges else html.escape(value)
+            cells.append(f"<td{classes(column)}>{content}</td>")
+        rows.append(f"<tr>{''.join(cells)}</tr>")
+    st.html(
+        '<div class="bsl-table-wrap"><table class="bsl-table">'
+        f"<thead><tr>{head}</tr></thead><tbody>{''.join(rows)}</tbody></table></div>"
+    )
+
+
 def require_workforce() -> pd.DataFrame:
     workforce = st.session_state.workforce
     if workforce is None:
@@ -160,66 +317,14 @@ def require_analysis() -> AnalysisResult:
 def stale_notice() -> None:
     if not analysis_is_stale():
         return
-    with st.container(border=True):
-        st.warning(
-            "Inputs have changed since this analysis ran, so these results are out of date.",
-            icon=":material/update:",
-        )
-        if st.button("Re-run with current inputs", icon=":material/refresh:"):
-            with st.spinner("Running the analysis…"):
-                run_and_store()
-            st.rerun()
-
-
-def sidebar_status() -> None:
-    state = st.session_state
-    with st.sidebar:
-        st.markdown("**This session**")
-        if state.workforce is None:
-            st.caption("Workforce: not loaded")
-        else:
-            st.caption(f"Workforce: {len(state.workforce):,} employees ({state.workforce_source})")
-        st.caption(f"Plans: current + {len(state.alternatives)} alternative(s)")
-        if state.analysis is None:
-            st.caption("Analysis: not run yet")
-        elif analysis_is_stale():
-            st.caption("Analysis: out of date (inputs changed)")
-        else:
-            st.caption(f"Analysis: run at {state.analysis.run_at:%H:%M} UTC")
-        st.divider()
-        st.caption(DISCLAIMER)
-
-
-_ASSESSMENT_STYLE = {
-    LABEL_BALANCED: (st.success, ":material/check_circle:"),
-    LABEL_RISK: (st.warning, ":material/warning:"),
-    LABEL_SHORTFALL: (st.info, ":material/info:"),
-    LABEL_NOT_PREFERRED: (st.error, ":material/cancel:"),
-    LABEL_BASELINE: (st.info, ":material/info:"),
-}
-
-
-def escape(text: str) -> str:
-    return text.replace("$", "\\$")
-
-
-def assessment(label: str, rationale: str) -> None:
-    box, icon = _ASSESSMENT_STYLE.get(label, (st.info, ":material/info:"))
-    box(escape(f"**{label}.** {rationale}"), icon=icon)
-
-
-def delta_money(value: float, symbol: str) -> str | None:
-    rounded = round(value)
-    if rounded == 0:
-        return None
-    return f"{'-' if rounded < 0 else '+'}{symbol}{abs(rounded):,}"
-
-
-def delta_pp(value: float) -> str | None:
-    rounded = round(value, 1)
-    if rounded == 0:
-        return None
-    return f"{'-' if rounded < 0 else '+'}{abs(rounded):.1f} pp"
+    st.warning(
+        "Inputs have changed since this analysis ran, so these results are out of date.",
+        icon=":material/update:",
+    )
+    if st.button("Re-run with current inputs", icon=":material/refresh:"):
+        with st.spinner("Running the analysis…"):
+            run_and_store()
+        st.rerun()
 
 
 def plot(figure: Any) -> None:
@@ -250,12 +355,6 @@ def display_frame(
     return shown
 
 
-def table_view(frame: pd.DataFrame, label: str = "Show the data behind this chart") -> None:
+def table_view(frame: pd.DataFrame, label: str = "Data table") -> None:
     with st.expander(label, icon=":material/table:"):
         st.dataframe(frame, hide_index=True, width="stretch", height="content")
-
-
-def summary_table(frame: pd.DataFrame) -> None:
-    shown = frame.astype(str).map(escape)
-    shown.columns = [escape(str(column)) for column in shown.columns]
-    st.table(shown, border="horizontal", hide_index=True)

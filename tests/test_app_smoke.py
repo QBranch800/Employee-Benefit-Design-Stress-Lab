@@ -43,12 +43,12 @@ def button(at: AppTest, label: str):
 def test_introduction_renders():
     at = AppTest.from_file(str(APP / "app.py"), default_timeout=60).run()
     assert not at.exception
-    assert at.title[0].value == ui.APP_TITLE
+    assert button(at, "Load demonstration") is not None
 
 
 def test_demo_button_runs_the_analysis():
     at = AppTest.from_file(str(APP / "app.py"), default_timeout=60).run()
-    button(at, "Load demonstration scenario").click().run()
+    button(at, "Load demonstration").click().run()
     assert not at.exception
     assert at.session_state["analysis"] is not None
     assert len(at.session_state["alternatives"]) == 3
@@ -66,19 +66,18 @@ def test_pages_render_with_demo(page):
     assert not at.exception
 
 
-def test_results_show_headline_numbers_and_assessment():
+def test_results_open_on_the_focus_plan():
     at = open_page("pages/4_results.py", with_demo=True)
-    assert len(at.metric) == 5
     assert at.selectbox[0].value == "B: Proposed cost shift"
-    assert any("Savings achieved; employee risk increased" in box.value for box in at.warning)
-    assert not at.info or all("No analysis yet" not in box.value for box in at.info)
+    assert len(at.tabs) == 5
+    assert not at.info
 
 
 def test_results_switch_alternative():
     at = open_page("pages/4_results.py", with_demo=True)
     at.selectbox[0].select("A: Modest adjustment").run()
     assert not at.exception
-    assert any("Balanced" in box.value for box in at.success)
+    assert at.session_state["focus_plan"] == "A: Modest adjustment"
 
 
 def test_generating_a_workforce():
@@ -86,12 +85,12 @@ def test_generating_a_workforce():
     button(at, "Generate workforce").click().run()
     assert not at.exception
     assert len(at.session_state["workforce"]) == 500
-    assert at.metric[0].value == "500"
+    assert any("Generated 500" in box.value for box in at.success)
 
 
 def test_copying_the_current_plan():
     at = open_page("pages/2_plan_designer.py", with_demo=False)
-    button(at, "Copy the current plan as a new alternative").click().run()
+    button(at, "Duplicate current plan").click().run()
     assert not at.exception
     assert [plan.name for plan in at.session_state["alternatives"]] == [
         "Proposed plan",

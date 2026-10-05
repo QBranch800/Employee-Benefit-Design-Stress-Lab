@@ -162,7 +162,7 @@ def self_check() -> int:
     sys.path.insert(0, str(root / "app"))
 
     home = AppTest.from_file(str(root / "app" / "app.py"), default_timeout=300).run()
-    demo = next(item for item in home.button if item.label == "Load demonstration scenario")
+    demo = next(item for item in home.button if item.label == "Load demonstration")
     demo.click().run()
     if home.exception or home.session_state["analysis"] is None:
         print("Self-check failed: the demonstration did not run.", home.exception)
@@ -172,7 +172,7 @@ def self_check() -> int:
     for key in STATE_KEYS:
         results.session_state[key] = home.session_state[key]
     results.run()
-    if results.exception or len(results.metric) != 5:
+    if results.exception or len(results.tabs) != 5:
         print("Self-check failed: the results page did not render.", results.exception)
         return 1
 
