@@ -120,7 +120,7 @@ The synthetic workforce is drawn from explicit distributions with a fixed seed. 
 
 ## Run it
 
-Requires Python 3.11 or later. The app runs in the browser on macOS, Windows, and Linux.
+Requires Python 3.11 or later. The app runs in the browser on macOS, Windows, and Linux, and the tests run on all three on every push.
 
 macOS and Linux:
 
@@ -146,6 +146,35 @@ streamlit run app/app.py
 
 Then choose **Load demonstration scenario** on the first page.
 
+## Desktop app
+
+The same app is packaged as an installable program for macOS and Windows. It carries its own Python, runs entirely on your computer, and opens in its own window. It listens only on your own machine, so nothing is exposed to the network.
+
+| System | Installer | How to install |
+|---|---|---|
+| macOS (Apple silicon) | `BenefitDesignStressLab-macOS.dmg` | Open the disk image and drag the app to Applications |
+| Windows 10 and 11 (64-bit) | `BenefitDesignStressLab-Setup.exe` | Run the installer. It adds a Start-menu entry and an optional desktop shortcut |
+
+The `desktop` workflow builds both installers on GitHub, runs a self-test inside each packaged app, and attaches them to every [release](https://github.com/QBranch800/Employee-Benefit-Design-Stress-Lab/releases).
+
+The installers are not code-signed, so the first launch shows a warning:
+
+- **macOS:** Control-click the app and choose Open. On recent versions, go to System Settings → Privacy & Security and choose Open Anyway.
+- **Windows:** choose More info, then Run anyway.
+
+To build it yourself, run this on the system you want to target:
+
+```bash
+pip install -e ".[desktop]"
+python desktop/build.py --check
+```
+
+The app and its installer appear in `dist/`. `--check` runs the packaged app's self-test: it loads the demonstration, runs the analysis, and renders the results page. The Windows installer step needs [Inno Setup 6](https://jrsoftware.org/isinfo.php). The Windows app uses the WebView2 runtime, which ships with Windows 11 and current Windows 10.
+
+## Deploy as a web app
+
+The repository is ready for [Streamlit Community Cloud](https://streamlit.io/cloud): create a new app, select this repository and the `main` branch, and set the main file to `app/app.py`. The dependencies in `requirements.txt` and the theme in `.streamlit/config.toml` are picked up automatically.
+
 ## Test it
 
 ```bash
@@ -160,6 +189,7 @@ The suite has 142 tests. They cover the cost-sharing rules, five employees calcu
 
 ```text
 app/                     Streamlit pages, charts, and theme
+desktop/                 Desktop launcher, build script, and Windows installer recipe
 src/benefit_stress_lab/  Calculation engine
 tests/                   Automated tests
 data/                    Synthetic example and upload template
