@@ -4,33 +4,40 @@ enableStaticServing = true
 [browser]
 gatherUsageStats = false
 
+[client]
+toolbarMode = "minimal"
+
 [theme]
 font = "Geist, sans-serif"
 headingFont = "Geist, sans-serif"
 codeFont = "'Geist Mono', monospace"
-baseRadius = "small"
+baseFontSize = 15
+baseRadius = "0.5rem"
+buttonRadius = "0.5rem"
+showWidgetBorder = true
+linkUnderline = false
+headingFontSizes = ["2rem", "1.375rem", "1.0625rem", "1rem", "0.9375rem", "0.875rem"]
+headingFontWeights = [600, 600, 600, 600, 600, 600]
 
 [theme.light]
 primaryColor = "#2167AE"
 backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#EEF3F9"
-textColor = "#23366F"
+secondaryBackgroundColor = "#FAFAFA"
+textColor = "#171717"
 linkColor = "#2167AE"
-blueColor = "#2167AE"
-borderColor = "#D6DFEA"
-dataframeHeaderBackgroundColor = "#EEF3F9"
-chartCategoricalColors = ["#8A94A6", "#2167AE", "#E07B39", "#1F9E89"]
+borderColor = "#EAEAEA"
+dataframeHeaderBackgroundColor = "#FAFAFA"
+chartCategoricalColors = ["#8F8F8F", "#2167AE", "#E07B39", "#1F9E89"]
 
 [theme.dark]
-primaryColor = "#4F8FD0"
-backgroundColor = "#0F1A33"
-secondaryBackgroundColor = "#1A2747"
-textColor = "#F2F5FA"
+primaryColor = "#5B9BD9"
+backgroundColor = "#0A0A0A"
+secondaryBackgroundColor = "#161616"
+textColor = "#EDEDED"
 linkColor = "#7FB0E3"
-blueColor = "#4F8FD0"
-borderColor = "#2C3B5E"
-dataframeHeaderBackgroundColor = "#1A2747"
-chartCategoricalColors = ["#8C96AA", "#4F8FD0", "#D8743A", "#27A06F"]
+borderColor = "#2A2A2A"
+dataframeHeaderBackgroundColor = "#161616"
+chartCategoricalColors = ["#8F8F8F", "#4F8FD0", "#D8743A", "#27A06F"]
 
 [[theme.fontFaces]]
 family = "Geist"

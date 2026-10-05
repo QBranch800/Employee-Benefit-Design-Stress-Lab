@@ -11,18 +11,27 @@ METHODOLOGY = Path(__file__).resolve().parents[2] / "METHODOLOGY.md"
 
 ui.init_state()
 
-if METHODOLOGY.exists():
-    st.markdown(METHODOLOGY.read_text(encoding="utf-8"))
-else:
-    st.title("Method and limitations")
-    st.warning("METHODOLOGY.md was not found next to the app.", icon=":material/warning:")
+with st.container(key="prose-method"):
+    if METHODOLOGY.exists():
+        st.markdown(METHODOLOGY.read_text(encoding="utf-8"))
+    else:
+        ui.page_header("Method and limitations")
+        st.warning("METHODOLOGY.md was not found next to the app.", icon=":material/warning:")
 
-st.divider()
-st.subheader("This session")
-st.caption(f"Model version {config.MODEL_VERSION}")
-result = st.session_state.analysis
-if result is None:
-    st.caption("No analysis has been run in this session yet.")
-else:
-    st.caption(f"Last analysis run: {result.run_at:%d %b %Y %H:%M:%S} UTC")
-    st.dataframe(reporting.assumptions_table(result), hide_index=True, width="stretch")
+    with ui.card("method-session"):
+        result = st.session_state.analysis
+        if result is None:
+            ui.card_title(
+                "This session",
+                f"Model version {config.MODEL_VERSION}. No analysis has been run yet.",
+            )
+        else:
+            ui.card_title(
+                "This session",
+                f"Model version {config.MODEL_VERSION}. Last analysis run "
+                f"{result.run_at:%d %b %Y, %H:%M:%S} UTC.",
+            )
+            table = reporting.assumptions_table(result).rename(
+                columns={"parameter": "Setting", "value": "Value"}
+            )
+            ui.html_table(table, numeric=["Value"])

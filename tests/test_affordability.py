@@ -117,7 +117,8 @@ def test_zero_baseline_cost_gives_nan_saving(make_workforce, current):
 def test_burden_quantiles_match_employee_rows(rows, proposed):
     quantiles = burden_quantiles(rows)
     plan_rows = rows[rows["plan_name"] == proposed.name]["burden_pct"]
-    assert list(quantiles.columns) == ["p25", "median", "p75", "p95"]
+    assert list(quantiles.columns) == ["p5", "p25", "median", "p75", "p95"]
     assert quantiles.loc[proposed.name, "median"] == pytest.approx(plan_rows.median())
     assert quantiles.loc[proposed.name, "p95"] == pytest.approx(plan_rows.quantile(0.95))
+    assert (quantiles["p5"] <= quantiles["p25"]).all()
     assert (quantiles["p25"] <= quantiles["median"]).all()

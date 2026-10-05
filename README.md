@@ -146,7 +146,7 @@ pip install -r requirements.txt
 streamlit run app/app.py
 ```
 
-Then choose **Load demonstration scenario** on the first page.
+Then choose **Load demonstration** on the first page.
 
 ## Desktop app
 
