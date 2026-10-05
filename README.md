@@ -1,3 +1,5 @@
+<img src="desktop/icon.png" width="88" alt="Benefit Design Stress Lab logo">
+
 # Benefit Design Stress Lab
 
 > Stress-test employee health-plan changes before they become employee problems.
