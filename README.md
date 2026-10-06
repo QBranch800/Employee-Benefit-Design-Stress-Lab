@@ -46,7 +46,7 @@ These are results from synthetic data under simplified rules. They illustrate th
 - Stress-tests conclusions against higher healthcare costs, more high users, salary growth, and coverage-mix changes
 - Exports aggregate results only
 
-![Sensitivity heatmap: share of employees above the threshold as costs and high use rise](reports/figures/sensitivity.png)
+![Sensitivity heatmap of the share of employees above the threshold, beside the employer contribution trade-off](reports/figures/sensitivity.png)
 
 Not included: real insurer quotes, actuarial pricing, tax treatment, provider networks, co-payments, predictions of individual health, or automatic plan selection. There is no machine learning and no language model. The value is in formulas that can be read, checked, and tested.
 
