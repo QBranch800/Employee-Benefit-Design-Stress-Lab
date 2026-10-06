@@ -5,7 +5,7 @@ from benefit_stress_lab.schemas import Plan, SalarySubsidy, TierRules
 
 def current_plan() -> Plan:
     return Plan(
-        name="Current plan",
+        name="Current Plan",
         tiers={
             "employee_only": TierRules(
                 annual_premium=6_000,
@@ -25,7 +25,7 @@ def current_plan() -> Plan:
     )
 
 
-def proposed_plan(name: str = "Proposed plan") -> Plan:
+def proposed_plan(name: str = "Proposed Plan") -> Plan:
     return Plan(
         name=name,
         tiers={
@@ -54,16 +54,16 @@ def scenario_a_balanced() -> Plan:
             employee_only={"annual_premium": 5_640, "deductible": 750},
             family={"annual_premium": 14_100, "deductible": 1_500},
         )
-        .renamed("A: Modest adjustment")
+        .renamed("A: Modest Adjustment")
     )
 
 
 def scenario_b_hidden_problem() -> Plan:
-    return proposed_plan("B: Proposed cost shift")
+    return proposed_plan("B: Proposed Cost Shift")
 
 
 def scenario_c_targeted_mitigation() -> Plan:
-    plan = proposed_plan("C: B + low-pay subsidy")
+    plan = proposed_plan("C: B + Low-Pay Subsidy")
     return plan.model_copy(
         update={"salary_subsidy": SalarySubsidy(salary_below=60_000, employer_contribution_pct=90)}
     )

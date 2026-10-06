@@ -68,16 +68,16 @@ def test_pages_render_with_demo(page):
 
 def test_results_open_on_the_focus_plan():
     at = open_page("pages/4_results.py", with_demo=True)
-    assert at.selectbox[0].value == "B: Proposed cost shift"
+    assert at.selectbox[0].value == "B: Proposed Cost Shift"
     assert len(at.tabs) == 5
     assert not at.info
 
 
 def test_results_switch_alternative():
     at = open_page("pages/4_results.py", with_demo=True)
-    at.selectbox[0].select("A: Modest adjustment").run()
+    at.selectbox[0].select("A: Modest Adjustment").run()
     assert not at.exception
-    assert at.session_state["focus_plan"] == "A: Modest adjustment"
+    assert at.session_state["focus_plan"] == "A: Modest Adjustment"
 
 
 def test_generating_a_workforce():
@@ -93,7 +93,7 @@ def test_copying_the_current_plan():
     button(at, "Duplicate current plan").click().run()
     assert not at.exception
     assert [plan.name for plan in at.session_state["alternatives"]] == [
-        "Proposed plan",
+        "Proposed Plan",
         "Alternative",
     ]
 

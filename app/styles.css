@@ -128,31 +128,53 @@ h4 {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 0;
-  perspective: 900px;
+  height: 320px;
+  perspective: 1300px;
 }
 
-.bsl-emblem img {
-  width: min(300px, 78%);
-  height: auto;
-  filter: drop-shadow(0 26px 34px rgba(16, 60, 120, 0.2));
-  animation: bsl-hover 7s ease-in-out infinite;
-  will-change: transform;
+.bsl-tilt {
+  transform-style: preserve-3d;
+  transform: rotateX(-27deg);
 }
 
-@keyframes bsl-hover {
-  0%,
-  100% {
-    transform: translateY(0) rotateX(2deg) rotateY(-14deg);
+.bsl-ring {
+  position: relative;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  animation: bsl-spin 20s linear infinite;
+}
+
+.bsl-strip {
+  position: absolute;
+  left: 0;
+  display: block;
+}
+
+.bsl-solid {
+  top: -42px;
+  height: 84px;
+  background: linear-gradient(180deg, #1e84ff, #0052f5);
+}
+
+.bsl-pale {
+  top: -52px;
+  height: 104px;
+  background: linear-gradient(180deg, var(--bsl-glass-top), var(--bsl-glass-bottom));
+}
+
+@keyframes bsl-spin {
+  from {
+    transform: rotateY(0deg);
   }
 
-  50% {
-    transform: translateY(-16px) rotateX(-2deg) rotateY(14deg);
+  to {
+    transform: rotateY(360deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bsl-emblem img {
+  .bsl-ring {
     animation: none;
   }
 }

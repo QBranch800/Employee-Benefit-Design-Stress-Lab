@@ -167,7 +167,7 @@ with st.container(horizontal=True, vertical_alignment="center"):
     if st.button("Duplicate current plan", disabled=not room, icon=":material/content_copy:"):
         add_alternative(state.current_plan.renamed(unique_name("Alternative")))
     if st.button("Add example proposal", disabled=not room, icon=":material/add:"):
-        add_alternative(demo.proposed_plan(unique_name("Proposed plan")))
+        add_alternative(demo.proposed_plan(unique_name("Proposed Plan")))
     if st.button("Remove this plan", disabled=slot == 0, icon=":material/delete:"):
         state.alternatives = [
             plan for index, plan in enumerate(state.alternatives) if index != slot - 1
