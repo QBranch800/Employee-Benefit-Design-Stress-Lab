@@ -107,7 +107,7 @@ h4 {
 }
 
 .bsl-hero h1 {
-  font-size: clamp(2.375rem, 3.6vw, 3.25rem);
+  font-size: clamp(2.25rem, 3.3vw, 3rem);
   line-height: 1.04;
   text-wrap: balance;
   letter-spacing: -0.05em;
@@ -128,55 +128,12 @@ h4 {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 320px;
-  perspective: 1300px;
 }
 
-.bsl-tilt {
-  transform-style: preserve-3d;
-  transform: rotateX(-27deg);
-}
-
-.bsl-ring {
-  position: relative;
-  width: 0;
-  height: 0;
-  transform-style: preserve-3d;
-  animation: bsl-spin 20s linear infinite;
-}
-
-.bsl-strip {
-  position: absolute;
-  left: 0;
-  display: block;
-}
-
-.bsl-solid {
-  top: -42px;
-  height: 84px;
-  background: linear-gradient(180deg, #1e84ff, #0052f5);
-}
-
-.bsl-pale {
-  top: -52px;
-  height: 104px;
-  background: linear-gradient(180deg, var(--bsl-glass-top), var(--bsl-glass-bottom));
-}
-
-@keyframes bsl-spin {
-  from {
-    transform: rotateY(0deg);
-  }
-
-  to {
-    transform: rotateY(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bsl-ring {
-    animation: none;
-  }
+.bsl-emblem canvas {
+  width: 100%;
+  max-width: 430px;
+  height: 360px;
 }
 
 .bsl-page-title {
