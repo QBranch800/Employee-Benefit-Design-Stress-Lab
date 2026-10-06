@@ -12,6 +12,7 @@ import theme
 LOGO = Path(__file__).resolve().parent / "static" / "logo.png"
 SLOGAN = "See who pays for a cheaper health plan."
 RING_SCRIPT = Path(__file__).resolve().parent / "ring.js"
+RING_MODEL = Path(__file__).resolve().parent / "ring_model.json"
 RING_PERIOD_SECONDS = 30
 
 st.set_page_config(page_title=ui.APP_TITLE, page_icon=Image.open(LOGO), layout="wide")
@@ -28,18 +29,13 @@ STEPS = (
 
 
 def spinning_ring() -> str:
-    dark = theme.palette().mode == "dark"
-    attributes = {
-        "period": RING_PERIOD_SECONDS,
-        "solid-top": "rgba(10, 123, 255, 0.97)",
-        "solid-bottom": "rgba(0, 88, 252, 0.97)",
-        "pale": "70, 155, 255" if dark else "0, 113, 254",
-        "glass": 0.46 if dark else 0.36,
-    }
-    data = " ".join(f'data-{name}="{value}"' for name, value in attributes.items())
+    model = RING_MODEL.read_text(encoding="utf-8")
+    script = RING_SCRIPT.read_text(encoding="utf-8")
     return (
-        f'<div class="bsl-emblem" aria-hidden="true"><canvas id="bsl-ring" {data}></canvas></div>'
-        f"<script>{RING_SCRIPT.read_text(encoding='utf-8')}</script>"
+        '<div class="bsl-emblem" aria-hidden="true">'
+        f'<canvas id="bsl-ring" data-mode="{theme.palette().mode}" '
+        f'data-period="{RING_PERIOD_SECONDS}"></canvas></div>'
+        f"<script>window.bslRingModel = {model};{script}</script>"
     )
 
 

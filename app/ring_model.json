@@ -1,0 +1,307 @@
+{
+  "camera": {
+    "tilt": 0.5343,
+    "distance": 9.0,
+    "unit": 384.9,
+    "middle": 587.5
+  },
+  "frame": {
+    "width": 920,
+    "height": 830,
+    "centre": 622
+  },
+  "patches": [
+    {
+      "kind": "solid",
+      "colours": [
+        "#0271FE",
+        "#0271FE"
+      ],
+      "radius": 0.6336,
+      "start": -2.2489,
+      "end": -2.8055,
+      "top": -0.3734,
+      "bottom": 0.1269
+    },
+    {
+      "kind": "solid",
+      "colours": [
+        "#0271FE",
+        "#0271FE"
+      ],
+      "radius": 0.6336,
+      "start": 2.2489,
+      "end": 2.8055,
+      "top": -0.3734,
+      "bottom": 0.1269
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#A8CEFE",
+        "#A4CBFD"
+      ],
+      "radius": 0.7787,
+      "start": -1.8105,
+      "end": -2.8691,
+      "top": -0.6138,
+      "bottom": -0.1769
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#A8CEFE",
+        "#A4CBFD"
+      ],
+      "radius": 0.7787,
+      "start": 1.8105,
+      "end": 2.8691,
+      "top": -0.6138,
+      "bottom": -0.1769
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#A1CBFD",
+        "#A1CBFD"
+      ],
+      "radius": 0.6247,
+      "start": -2.2181,
+      "end": -2.793,
+      "top": 0.1174,
+      "bottom": 0.3469
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#A1CBFD",
+        "#A1CBFD"
+      ],
+      "radius": 0.6247,
+      "start": 2.2181,
+      "end": 2.793,
+      "top": 0.1174,
+      "bottom": 0.3469
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#79B6FE",
+        "#90C3FD"
+      ],
+      "radius": 0.8171,
+      "start": -1.8086,
+      "end": -2.3549,
+      "top": -0.0627,
+      "bottom": 0.4298
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#79B6FE",
+        "#90C3FD"
+      ],
+      "radius": 0.8171,
+      "start": 1.8086,
+      "end": 2.3549,
+      "top": -0.0627,
+      "bottom": 0.4298
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#057BFC",
+        "#0C7FFD",
+        "#3C97FE",
+        "#D5E7FD"
+      ],
+      "radius": 1.1223,
+      "start": -1.7663,
+      "end": -2.1927,
+      "top": -0.213,
+      "bottom": 0.2559
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#057BFC",
+        "#0C7FFD",
+        "#3C97FE",
+        "#D5E7FD"
+      ],
+      "radius": 1.1223,
+      "start": 1.7663,
+      "end": 2.1927,
+      "top": -0.213,
+      "bottom": 0.2559
+    },
+    {
+      "kind": "solid",
+      "colours": [
+        "#006DFE",
+        "#0068FB"
+      ],
+      "radius": 0.9275,
+      "start": -1.0999,
+      "end": -0.618,
+      "top": -0.3146,
+      "bottom": 0.3621
+    },
+    {
+      "kind": "solid",
+      "colours": [
+        "#006DFE",
+        "#0068FB"
+      ],
+      "radius": 0.9275,
+      "start": 1.0999,
+      "end": 0.618,
+      "top": -0.3146,
+      "bottom": 0.3621
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#55A7FD",
+        "#69B2FD"
+      ],
+      "radius": 0.9447,
+      "start": -0.8611,
+      "end": -0.3912,
+      "top": -0.3269,
+      "bottom": -0.0715
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#55A7FD",
+        "#69B2FD"
+      ],
+      "radius": 0.9447,
+      "start": 0.8611,
+      "end": 0.3912,
+      "top": -0.3269,
+      "bottom": -0.0715
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#D4E6FE",
+        "#D4E6FE"
+      ],
+      "radius": 0.9466,
+      "start": -0.8707,
+      "end": -0.398,
+      "top": -0.0695,
+      "bottom": 0.159
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#D4E6FE",
+        "#D4E6FE"
+      ],
+      "radius": 0.9466,
+      "start": 0.8707,
+      "end": 0.398,
+      "top": -0.0695,
+      "bottom": 0.159
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#DFEDFE",
+        "#D3E6FD"
+      ],
+      "radius": 0.7351,
+      "start": -0.89,
+      "end": -0.3334,
+      "top": 0.1189,
+      "bottom": 0.7829
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#DFEDFE",
+        "#D3E6FD"
+      ],
+      "radius": 0.7351,
+      "start": 0.89,
+      "end": 0.3334,
+      "top": 0.1189,
+      "bottom": 0.7829
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#BBDAFD",
+        "#D8E9FD"
+      ],
+      "radius": 1.0865,
+      "start": -1.2607,
+      "end": -0.8647,
+      "top": -0.4222,
+      "bottom": 0.1577
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#BBDAFD",
+        "#D8E9FD"
+      ],
+      "radius": 1.0865,
+      "start": 1.2607,
+      "end": 0.8647,
+      "top": -0.4222,
+      "bottom": 0.1577
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#87BDFC",
+        "#82BBFC"
+      ],
+      "radius": 0.9676,
+      "start": 2.9162,
+      "end": 3.367,
+      "top": -0.2136,
+      "bottom": 0.309
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#2F95FE",
+        "#399CFD"
+      ],
+      "radius": 0.9167,
+      "start": -0.2605,
+      "end": 0.2605,
+      "top": -0.2618,
+      "bottom": -0.0179
+    },
+    {
+      "kind": "solid",
+      "colours": [
+        "#006FFE",
+        "#006FFE"
+      ],
+      "radius": 1.0001,
+      "start": -0.2409,
+      "end": 0.2409,
+      "top": -0.0717,
+      "bottom": 0.3913
+    },
+    {
+      "kind": "glass",
+      "colours": [
+        "#A2C8FD",
+        "#A2C8FD"
+      ],
+      "radius": 1.02,
+      "start": -0.2338,
+      "end": 0.2338,
+      "top": -0.0852,
+      "bottom": 0.148
+    }
+  ]
+}
