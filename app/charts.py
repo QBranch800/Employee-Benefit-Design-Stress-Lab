@@ -14,9 +14,13 @@ SENSITIVITY_LABELS = {
 }
 
 SENSITIVITY_METRICS = {
-    "above_threshold_pct": ("Share above threshold", formatting.pct, "%"),
-    "above_threshold_change_pp": ("Change in share above threshold", formatting.pp, " pp"),
-    "employer_saving_pct": ("Employer saving", formatting.pct, "%"),
+    "above_threshold_pct": ("Share above threshold", formatting.pct, "% of employees"),
+    "above_threshold_change_pp": (
+        "Change in share above threshold",
+        formatting.pp,
+        "percentage points",
+    ),
+    "employer_saving_pct": ("Employer saving", formatting.pct, "% of current employer cost"),
 }
 
 
@@ -361,7 +365,9 @@ def _heatmap(
     pal: Palette,
     scale: tuple[tuple[float, str], ...],
     limits: tuple[float, float],
-    bar_suffix: str,
+    bar_suffix: str = "",
+    *,
+    bar: bool = True,
 ) -> go.Figure:
     low, high = limits
     fig = go.Figure(
@@ -377,8 +383,10 @@ def _heatmap(
             ygap=3,
             hoverongaps=False,
             hovertemplate="%{customdata}<extra></extra>",
+            showscale=bar,
             colorbar={
                 "ticksuffix": bar_suffix,
+                "tickformat": ".1~f",
                 "thickness": 8,
                 "outlinewidth": 0,
                 "nticks": 5,
@@ -487,17 +495,18 @@ def winners_losers(summary: pd.DataFrame, pal: Palette) -> go.Figure:
 
 
 def sensitivity_heatmap(grid: pd.DataFrame, metric: str, pal: Palette) -> go.Figure:
-    title, fmt, suffix = SENSITIVITY_METRICS[metric]
+    title, fmt, _ = SENSITIVITY_METRICS[metric]
     index, columns = "high_use_shift_pct", "healthcare_cost_change_pct"
-    values = grid.pivot(index=index, columns=columns, values=metric)
+    values = grid.pivot(index=index, columns=columns, values=metric).round(1)
     labels = grid.pivot(index=index, columns=columns, values="label")
     x = [f"{change:+g}%" if change else "0%" for change in values.columns]
     y = [f"{shift:g}%" for shift in values.index]
     z = values.to_numpy().tolist()
-    text = [[fmt(value) for value in row] for row in z]
+    full = [[fmt(value) for value in row] for row in z]
+    text = [[cell.removesuffix(" pp") for cell in row] for row in full]
     hover = [
         [
-            f"<b>{text[i][j]}</b> {title.lower()}<br>"
+            f"<b>{full[i][j]}</b> {title.lower()}<br>"
             f"Costs {x[j]}, {y[i]} moved into high use<br>{labels.iat[i, j]}"
             for j in range(len(x))
         ]
@@ -505,10 +514,12 @@ def sensitivity_heatmap(grid: pd.DataFrame, metric: str, pal: Palette) -> go.Fig
     ]
     low, high = float(values.min().min()), float(values.max().max())
     if low == high:
-        high = low + 1.0
-    fig = _heatmap(z, x, y, text, hover, pal, pal.sequential_scale, (low, high), suffix)
-    _style(fig, pal, height=340)
-    fig.update_xaxes(title_text="Healthcare cost change", type="category", showline=False)
+        low, high = low - 1.0, high + 1.0
+    fig = _heatmap(z, x, y, text, hover, pal, pal.sequential_scale, (low, high), bar=False)
+    _style(fig, pal, height=360)
+    fig.update_xaxes(
+        title_text="Healthcare cost change", type="category", showline=False, tickangle=0
+    )
     fig.update_yaxes(title_text="Moved into high use", showgrid=False, type="category")
     return fig
 
