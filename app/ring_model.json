@@ -1,307 +1,399 @@
 {
   "camera": {
-    "tilt": 0.6155,
+    "tilt": 35.26,
     "distance": 14.0,
     "unit": 395.4,
     "middle": 611.0
   },
   "frame": {
-    "width": 862,
-    "height": 834,
-    "centre": 633
+    "width": 880,
+    "height": 830,
+    "centre": 622
   },
-  "patches": [
+  "rings": [
     {
       "kind": "solid",
-      "colours": [
-        "#0271FE",
-        "#0271FE"
-      ],
-      "radius": 0.96,
-      "start": -2.5993,
-      "end": -2.9273,
-      "top": -0.1568,
-      "bottom": 0.3651
-    },
-    {
-      "kind": "solid",
-      "colours": [
-        "#0271FE",
-        "#0271FE"
-      ],
-      "radius": 0.96,
-      "start": 2.5993,
-      "end": 2.9273,
-      "top": -0.1568,
-      "bottom": 0.3651
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#A8CEFE",
-        "#A4CBFD"
-      ],
-      "radius": 0.96,
-      "start": -2.2032,
-      "end": -2.9315,
-      "top": -0.4661,
-      "bottom": -0.0096
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#A8CEFE",
-        "#A4CBFD"
-      ],
-      "radius": 0.96,
-      "start": 2.2032,
-      "end": 2.9315,
-      "top": -0.4661,
-      "bottom": -0.0096
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#A1CBFD",
-        "#A1CBFD"
-      ],
-      "radius": 0.96,
-      "start": -2.595,
-      "end": -2.9248,
-      "top": 0.3704,
-      "bottom": 0.6081
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#A1CBFD",
-        "#A1CBFD"
-      ],
-      "radius": 0.96,
-      "start": 2.595,
-      "end": 2.9248,
-      "top": 0.3704,
-      "bottom": 0.6081
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#79B6FE",
-        "#90C3FD"
-      ],
-      "radius": 0.96,
-      "start": -2.153,
-      "end": -2.5295,
-      "top": 0.0901,
-      "bottom": 0.5972
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#79B6FE",
-        "#90C3FD"
-      ],
-      "radius": 0.96,
-      "start": 2.153,
-      "end": 2.5295,
-      "top": 0.0901,
-      "bottom": 0.5972
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#057BFC",
-        "#0C7FFD",
-        "#3C97FE",
-        "#D5E7FD"
-      ],
-      "radius": 1.04,
-      "start": -1.5708,
-      "end": -2.1504,
-      "top": -0.2865,
-      "bottom": 0.1848
+      "slots": [
+        {
+          "centre": 0.0,
+          "span": 27.03,
+          "radius": 1.0214,
+          "top": -0.2392,
+          "bottom": 0.2422,
+          "colours": [
+            "#006FFE",
+            "#006FFE",
+            "#006FFE",
+            "#006FFE"
+          ]
+        },
+        {
+          "centre": 46.15,
+          "span": 24.5,
+          "radius": 0.96,
+          "top": -0.4854,
+          "bottom": 0.2124,
+          "colours": [
+            "#006DFE",
+            "#006BFD",
+            "#006AFC",
+            "#0068FB"
+          ]
+        },
+        {
+          "centre": 111.21,
+          "span": 23.99,
+          "radius": 1.04,
+          "top": -0.2865,
+          "bottom": 0.1848,
+          "colours": [
+            "#057BFC",
+            "#0C7FFD",
+            "#3C97FE",
+            "#D5E7FD"
+          ]
+        },
+        {
+          "centre": 158.32,
+          "span": 18.79,
+          "radius": 0.96,
+          "top": -0.1568,
+          "bottom": 0.3651,
+          "colours": [
+            "#0271FE",
+            "#0271FE",
+            "#0271FE",
+            "#0271FE"
+          ]
+        },
+        {
+          "centre": 201.68,
+          "span": 18.79,
+          "radius": 0.96,
+          "top": -0.1568,
+          "bottom": 0.3651,
+          "colours": [
+            "#0271FE",
+            "#0271FE",
+            "#0271FE",
+            "#0271FE"
+          ]
+        },
+        {
+          "centre": 248.79,
+          "span": 23.99,
+          "radius": 1.04,
+          "top": -0.2865,
+          "bottom": 0.1848,
+          "colours": [
+            "#057BFC",
+            "#0C7FFD",
+            "#3C97FE",
+            "#D5E7FD"
+          ]
+        },
+        {
+          "centre": 313.85,
+          "span": 24.5,
+          "radius": 0.96,
+          "top": -0.4854,
+          "bottom": 0.2124,
+          "colours": [
+            "#006DFE",
+            "#006BFD",
+            "#006AFC",
+            "#0068FB"
+          ]
+        }
+      ]
     },
     {
       "kind": "glass",
-      "colours": [
-        "#057BFC",
-        "#0C7FFD",
-        "#3C97FE",
-        "#D5E7FD"
-      ],
-      "radius": 1.04,
-      "start": 1.5708,
-      "end": 2.1504,
-      "top": -0.2865,
-      "bottom": 0.1848
-    },
-    {
-      "kind": "solid",
-      "colours": [
-        "#006DFE",
-        "#0068FB"
-      ],
-      "radius": 0.96,
-      "start": -1.0192,
-      "end": -0.5917,
-      "top": -0.4854,
-      "bottom": 0.2124
-    },
-    {
-      "kind": "solid",
-      "colours": [
-        "#006DFE",
-        "#0068FB"
-      ],
-      "radius": 0.96,
-      "start": 1.0192,
-      "end": 0.5917,
-      "top": -0.4854,
-      "bottom": 0.2124
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#55A7FD",
-        "#69B2FD"
-      ],
-      "radius": 0.9779,
-      "start": -0.8098,
-      "end": -0.3779,
-      "top": -0.5081,
-      "bottom": -0.2417
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#55A7FD",
-        "#69B2FD"
-      ],
-      "radius": 0.9779,
-      "start": 0.8098,
-      "end": 0.3779,
-      "top": -0.5081,
-      "bottom": -0.2417
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#D4E6FE",
-        "#D4E6FE"
-      ],
-      "radius": 0.9789,
-      "start": -0.8168,
-      "end": -0.383,
-      "top": -0.2396,
-      "bottom": -0.0032
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#D4E6FE",
-        "#D4E6FE"
-      ],
-      "radius": 0.9789,
-      "start": 0.8168,
-      "end": 0.383,
-      "top": -0.2396,
-      "bottom": -0.0032
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#DFEDFE",
-        "#D3E6FD"
-      ],
-      "radius": 0.96,
-      "start": -0.6115,
-      "end": -0.2415,
-      "top": -0.2064,
-      "bottom": 0.4544
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#DFEDFE",
-        "#D3E6FD"
-      ],
-      "radius": 0.96,
-      "start": 0.6115,
-      "end": 0.2415,
-      "top": -0.2064,
-      "bottom": 0.4544
+      "slots": [
+        {
+          "centre": 0.0,
+          "span": 28.47,
+          "radius": 0.96,
+          "top": -0.4489,
+          "bottom": -0.194,
+          "colours": [
+            "#2F95FE",
+            "#3297FE",
+            "#369AFD",
+            "#399CFD"
+          ]
+        },
+        {
+          "centre": 34.02,
+          "span": 24.74,
+          "radius": 0.9779,
+          "top": -0.5081,
+          "bottom": -0.2417,
+          "colours": [
+            "#55A7FD",
+            "#5CABFD",
+            "#62AEFD",
+            "#69B2FD"
+          ]
+        },
+        {
+          "centre": 64.37,
+          "span": 21.77,
+          "radius": 1.04,
+          "top": -0.504,
+          "bottom": 0.1033,
+          "colours": [
+            "#BBDAFD",
+            "#C5DFFD",
+            "#CEE4FD",
+            "#D8E9FD"
+          ]
+        },
+        {
+          "centre": 147.1,
+          "span": 41.73,
+          "radius": 0.96,
+          "top": -0.4661,
+          "bottom": -0.0096,
+          "colours": [
+            "#A8CEFE",
+            "#A7CDFE",
+            "#A5CCFD",
+            "#A4CBFD"
+          ]
+        },
+        {
+          "centre": 212.9,
+          "span": 41.73,
+          "radius": 0.96,
+          "top": -0.4661,
+          "bottom": -0.0096,
+          "colours": [
+            "#A8CEFE",
+            "#A7CDFE",
+            "#A5CCFD",
+            "#A4CBFD"
+          ]
+        },
+        {
+          "centre": 295.63,
+          "span": 21.77,
+          "radius": 1.04,
+          "top": -0.504,
+          "bottom": 0.1033,
+          "colours": [
+            "#BBDAFD",
+            "#C5DFFD",
+            "#CEE4FD",
+            "#D8E9FD"
+          ]
+        },
+        {
+          "centre": 325.98,
+          "span": 24.74,
+          "radius": 0.9779,
+          "top": -0.5081,
+          "bottom": -0.2417,
+          "colours": [
+            "#55A7FD",
+            "#5CABFD",
+            "#62AEFD",
+            "#69B2FD"
+          ]
+        }
+      ]
     },
     {
       "kind": "glass",
-      "colours": [
-        "#BBDAFD",
-        "#D8E9FD"
-      ],
-      "radius": 1.04,
-      "start": -0.9335,
-      "end": -1.501,
-      "top": -0.504,
-      "bottom": 0.1033
+      "slots": [
+        {
+          "centre": 24.44,
+          "span": 21.2,
+          "radius": 0.96,
+          "top": -0.2064,
+          "bottom": 0.4544,
+          "colours": [
+            "#DFEDFE",
+            "#DBEBFE",
+            "#D7E8FD",
+            "#D3E6FD"
+          ]
+        },
+        {
+          "centre": 80.0,
+          "span": 21.39,
+          "radius": 0.96,
+          "top": -0.0582,
+          "bottom": 0.5258,
+          "colours": [
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF"
+          ]
+        },
+        {
+          "centre": 134.14,
+          "span": 21.58,
+          "radius": 0.96,
+          "top": 0.0901,
+          "bottom": 0.5972,
+          "colours": [
+            "#79B6FE",
+            "#81BAFE",
+            "#88BFFD",
+            "#90C3FD"
+          ]
+        },
+        {
+          "centre": 180.0,
+          "span": 24.52,
+          "radius": 0.96,
+          "top": -0.1819,
+          "bottom": 0.3387,
+          "colours": [
+            "#87BDFC",
+            "#85BCFC",
+            "#84BCFC",
+            "#82BBFC"
+          ]
+        },
+        {
+          "centre": 225.86,
+          "span": 21.58,
+          "radius": 0.96,
+          "top": 0.0901,
+          "bottom": 0.5972,
+          "colours": [
+            "#79B6FE",
+            "#81BAFE",
+            "#88BFFD",
+            "#90C3FD"
+          ]
+        },
+        {
+          "centre": 280.0,
+          "span": 21.39,
+          "radius": 0.96,
+          "top": -0.0582,
+          "bottom": 0.5258,
+          "colours": [
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF"
+          ]
+        },
+        {
+          "centre": 335.56,
+          "span": 21.2,
+          "radius": 0.96,
+          "top": -0.2064,
+          "bottom": 0.4544,
+          "colours": [
+            "#DFEDFE",
+            "#DBEBFE",
+            "#D7E8FD",
+            "#D3E6FD"
+          ]
+        }
+      ]
     },
     {
       "kind": "glass",
-      "colours": [
-        "#BBDAFD",
-        "#D8E9FD"
-      ],
-      "radius": 1.04,
-      "start": 0.9335,
-      "end": 1.501,
-      "top": -0.504,
-      "bottom": 0.1033
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#87BDFC",
-        "#82BBFC"
-      ],
-      "radius": 0.96,
-      "start": 2.9276,
-      "end": 3.3556,
-      "top": -0.1819,
-      "bottom": 0.3387
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#2F95FE",
-        "#399CFD"
-      ],
-      "radius": 0.96,
-      "start": -0.2485,
-      "end": 0.2485,
-      "top": -0.4489,
-      "bottom": -0.194
-    },
-    {
-      "kind": "solid",
-      "colours": [
-        "#006FFE",
-        "#006FFE"
-      ],
-      "radius": 1.0214,
-      "start": -0.2358,
-      "end": 0.2358,
-      "top": -0.2392,
-      "bottom": 0.2422
-    },
-    {
-      "kind": "glass",
-      "colours": [
-        "#A2C8FD",
-        "#A2C8FD"
-      ],
-      "radius": 1.04,
-      "start": -0.2302,
-      "end": 0.2302,
-      "top": -0.252,
-      "bottom": -0.0082
+      "slots": [
+        {
+          "centre": 0.0,
+          "span": 26.37,
+          "radius": 1.04,
+          "top": -0.252,
+          "bottom": -0.0082,
+          "colours": [
+            "#A2C8FD",
+            "#A2C8FD",
+            "#A2C8FD",
+            "#A2C8FD"
+          ]
+        },
+        {
+          "centre": 34.37,
+          "span": 24.86,
+          "radius": 0.9789,
+          "top": -0.2396,
+          "bottom": -0.0032,
+          "colours": [
+            "#D4E6FE",
+            "#D4E6FE",
+            "#D4E6FE",
+            "#D4E6FE"
+          ]
+        },
+        {
+          "centre": 96.0,
+          "span": 21.88,
+          "radius": 0.9694,
+          "top": 0.0654,
+          "bottom": 0.3024,
+          "colours": [
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF"
+          ]
+        },
+        {
+          "centre": 158.13,
+          "span": 18.9,
+          "radius": 0.96,
+          "top": 0.3704,
+          "bottom": 0.6081,
+          "colours": [
+            "#A1CBFD",
+            "#A1CBFD",
+            "#A1CBFD",
+            "#A1CBFD"
+          ]
+        },
+        {
+          "centre": 201.87,
+          "span": 18.9,
+          "radius": 0.96,
+          "top": 0.3704,
+          "bottom": 0.6081,
+          "colours": [
+            "#A1CBFD",
+            "#A1CBFD",
+            "#A1CBFD",
+            "#A1CBFD"
+          ]
+        },
+        {
+          "centre": 264.0,
+          "span": 21.88,
+          "radius": 0.9694,
+          "top": 0.0654,
+          "bottom": 0.3024,
+          "colours": [
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF",
+            "#FFFFFF"
+          ]
+        },
+        {
+          "centre": 325.63,
+          "span": 24.86,
+          "radius": 0.9789,
+          "top": -0.2396,
+          "bottom": -0.0032,
+          "colours": [
+            "#D4E6FE",
+            "#D4E6FE",
+            "#D4E6FE",
+            "#D4E6FE"
+          ]
+        }
+      ]
     }
   ]
 }
