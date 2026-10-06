@@ -5,7 +5,7 @@ import streamlit as st
 from pydantic import ValidationError
 
 import components as ui
-from benefit_stress_lab import config, demo, formatting
+from benefit_stress_lab import config, demo, formatting, reporting
 from benefit_stress_lab.schemas import Plan, TierRules, format_validation_error
 
 FIELDS = (
@@ -15,6 +15,10 @@ FIELDS = (
     ("coinsurance_pct", "Coinsurance (%)", 1.0),
     ("out_of_pocket_max", "Out-of-pocket maximum", 100.0),
     ("employer_allowance", "Employer allowance", 50.0),
+)
+COST_SHARING = (
+    "The employee pays the deductible in full, then the coinsurance share, up to the "
+    "out-of-pocket maximum. Hover over a question mark for a definition."
 )
 
 ui.init_state()
@@ -43,6 +47,7 @@ def plan_form(plan: Plan, slot: int) -> None:
     rev = state.form_rev
     with st.form(f"plan-{rev}-{slot}", border=False):
         name = st.text_input("Plan name", value=plan.name, max_chars=40)
+        st.caption(COST_SHARING)
         tiers = {}
         for column, tier in zip(
             st.columns(len(config.COVERAGE_TIERS), gap="medium"), config.COVERAGE_TIERS, strict=True
@@ -181,11 +186,16 @@ if not room:
     )
 
 with ui.card("plan-form"):
-    ui.card_title(
-        "Current plan" if slot == 0 else f"Alternative {slot}",
-        "The employee pays the deductible in full, then the coinsurance share, up to the "
-        "out-of-pocket maximum. Hover over a question mark for a definition.",
-    )
+    if slot == 0:
+        ui.card_title(
+            "Current plan",
+            "The plan employees have today. Every alternative is compared with it.",
+        )
+    else:
+        ui.card_title(
+            f"Alternative {slot}",
+            reporting.describe_changes(state.current_plan, plans[slot], symbol),
+        )
     plan_form(plans[slot], slot)
 
 with ui.card("plan-compare"):

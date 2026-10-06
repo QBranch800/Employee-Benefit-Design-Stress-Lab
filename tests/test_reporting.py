@@ -87,3 +87,39 @@ def test_signed_formatting():
 )
 def test_compact_money(value, expected):
     assert formatting.compact_money(value) == expected
+
+
+@pytest.mark.parametrize(
+    "plan, expected",
+    [
+        (
+            demo.scenario_a_balanced(),
+            "Compared with Current Plan: lower premiums and higher deductibles.",
+        ),
+        (
+            demo.scenario_b_hidden_problem(),
+            "Compared with Current Plan: lower premiums, the employer paying 70% of the "
+            "premium instead of 80%, higher deductibles, higher coinsurance and higher "
+            "out-of-pocket maximums.",
+        ),
+        (demo.current_plan().renamed("Copy"), "Identical to Current Plan."),
+    ],
+)
+def test_plan_changes_are_described(plan, expected):
+    assert reporting.describe_changes(demo.current_plan(), plan) == expected
+
+
+def test_plan_description_mentions_low_pay_support():
+    text = reporting.describe_changes(demo.current_plan(), demo.scenario_c_targeted_mitigation())
+    assert text.endswith(
+        "and the employer paying at least 90% of the premium for salaries below $60,000."
+    )
+
+
+def test_plan_description_handles_mixed_changes():
+    plan = demo.current_plan().with_tier_changes(
+        employee_only={"deductible": 250}, family={"deductible": 2_000}
+    )
+    assert reporting.describe_changes(demo.current_plan(), plan) == (
+        "Compared with Current Plan: different deductibles."
+    )

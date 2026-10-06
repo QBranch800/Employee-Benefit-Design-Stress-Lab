@@ -88,6 +88,25 @@ def test_generating_a_workforce():
     assert any("Generated 500" in box.value for box in at.success)
 
 
+def test_own_workforce_replaces_the_demo_plans():
+    at = open_page("pages/1_workforce.py", with_demo=True)
+    button(at, "Generate workforce").click().run()
+    assert not at.exception
+    assert [plan.name for plan in at.session_state["alternatives"]] == ["Proposed Plan"]
+    assert at.session_state["analysis"] is None
+    assert any("demonstration plans were replaced" in box.value for box in at.success)
+
+
+def test_own_workforce_keeps_edited_plans():
+    at = open_page("pages/1_workforce.py", with_demo=True)
+    kept = at.session_state["alternatives"][:2]
+    at.session_state["alternatives"] = kept
+    button(at, "Generate workforce").click().run()
+    assert not at.exception
+    assert at.session_state["alternatives"] == kept
+    assert at.session_state["analysis"] is not None
+
+
 def test_copying_the_current_plan():
     at = open_page("pages/2_plan_designer.py", with_demo=False)
     button(at, "Duplicate current plan").click().run()

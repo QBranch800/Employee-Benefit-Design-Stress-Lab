@@ -8,6 +8,7 @@ import pandas as pd
 from benefit_stress_lab import config, formatting
 from benefit_stress_lab.recommendations import PROPOSAL_KEY
 from benefit_stress_lab.scenarios import AnalysisResult
+from benefit_stress_lab.schemas import Plan
 
 PLAN_TABLE_COLUMNS: dict[str, str] = {
     "headcount": "Headcount",
@@ -48,6 +49,27 @@ LIMITATIONS: tuple[str, ...] = (
     "Group averages and medians can conceal individual hardship.",
     "Results depend on user-selected objectives and assumptions.",
 )
+
+PLAN_CHANGES: dict[str, tuple[str, str, str]] = {
+    "annual_premium": ("lower premiums", "higher premiums", "different premiums"),
+    "employer_contribution_pct": (
+        "a smaller employer share of the premium",
+        "a larger employer share of the premium",
+        "a different employer share of the premium",
+    ),
+    "deductible": ("lower deductibles", "higher deductibles", "different deductibles"),
+    "coinsurance_pct": ("lower coinsurance", "higher coinsurance", "different coinsurance"),
+    "out_of_pocket_max": (
+        "lower out-of-pocket maximums",
+        "higher out-of-pocket maximums",
+        "different out-of-pocket maximums",
+    ),
+    "employer_allowance": (
+        "a smaller employer allowance",
+        "a larger employer allowance",
+        "a different employer allowance",
+    ),
+}
 
 
 def plan_table(result: AnalysisResult) -> pd.DataFrame:
@@ -100,6 +122,42 @@ def assumptions_table(result: AnalysisResult) -> pd.DataFrame:
 
 def plans_table(result: AnalysisResult) -> pd.DataFrame:
     return pd.concat([plan.to_frame() for plan in result.input_plans], ignore_index=True)
+
+
+def _employer_share(current: Plan, plan: Plan) -> str | None:
+    before = {current.tiers[tier].employer_contribution_pct for tier in config.COVERAGE_TIERS}
+    after = {plan.tiers[tier].employer_contribution_pct for tier in config.COVERAGE_TIERS}
+    if len(before) == 1 and len(after) == 1:
+        return f"the employer paying {after.pop():g}% of the premium instead of {before.pop():g}%"
+    return None
+
+
+def describe_changes(current: Plan, plan: Plan, symbol: str = "$") -> str:
+    parts = []
+    for field, (lower, higher, mixed) in PLAN_CHANGES.items():
+        moves = [
+            getattr(plan.tiers[tier], field) - getattr(current.tiers[tier], field)
+            for tier in config.COVERAGE_TIERS
+        ]
+        if not any(moves):
+            continue
+        phrase = lower if max(moves) <= 0 else higher if min(moves) >= 0 else mixed
+        if field == "employer_contribution_pct":
+            phrase = _employer_share(current, plan) or phrase
+        parts.append(phrase)
+    subsidy = plan.salary_subsidy
+    if subsidy != current.salary_subsidy:
+        if subsidy is None:
+            parts.append("no extra support for lower salaries")
+        else:
+            parts.append(
+                f"the employer paying at least {subsidy.employer_contribution_pct:g}% of the "
+                f"premium for salaries below {formatting.money(subsidy.salary_below, symbol)}"
+            )
+    if not parts:
+        return f"Identical to {current.name}."
+    listed = parts[0] if len(parts) == 1 else f"{', '.join(parts[:-1])} and {parts[-1]}"
+    return f"Compared with {current.name}: {listed}."
 
 
 def to_csv_bytes(frame: pd.DataFrame, *, index: bool = False) -> bytes:
