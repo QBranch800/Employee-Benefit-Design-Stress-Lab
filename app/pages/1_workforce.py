@@ -166,9 +166,10 @@ with source, ui.card("workforce-source"):
                 state.costs = new_costs
                 state.workforce = generate_workforce(new_settings, new_costs)
                 state.workforce_source = "Synthetic"
+                note = f" {ui.DEMO_PLANS_REPLACED}" if ui.leave_demo() else ""
                 ui.inputs_changed()
                 st.success(
-                    f"Generated {new_settings.headcount:,} synthetic employees.",
+                    f"Generated {new_settings.headcount:,} synthetic employees.{note}",
                     icon=":material/check_circle:",
                 )
 
@@ -201,11 +202,17 @@ with source, ui.card("workforce-source"):
                 if st.button("Use this workforce", type="primary"):
                     state.workforce = report.data
                     state.workforce_source = "Uploaded CSV"
+                    if ui.leave_demo():
+                        state.workforce_note = ui.DEMO_PLANS_REPLACED
                     ui.inputs_changed()
                     st.rerun()
         with st.expander("Columns and validation rules"):
             st.dataframe(COLUMN_GUIDE, hide_index=True, width="stretch", height="content")
             st.markdown("\n".join(f"- {rule}" for rule in UPLOAD_RULES))
+
+note = state.pop("workforce_note", None)
+if note:
+    st.info(note, icon=":material/info:")
 
 workforce = state.workforce
 with summary_column:

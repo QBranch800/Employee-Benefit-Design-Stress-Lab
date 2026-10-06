@@ -185,7 +185,7 @@ pytest
 ruff check .
 ```
 
-The suite has 142 tests. They cover the cost-sharing rules, five employees calculated by hand, boundary cases, upload validation, reconciliation of segment totals to workforce totals, the stress scenarios, the exports, and a smoke test of every page.
+The suite has 149 tests. They cover the cost-sharing rules, five employees calculated by hand, boundary cases, upload validation, reconciliation of segment totals to workforce totals, the stress scenarios, the exports, and a smoke test of every page.
 
 ## Project layout
 

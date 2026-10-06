@@ -27,6 +27,9 @@ DISCLAIMER = (
     "Educational scenario analysis on synthetic data under simplified plan rules. "
     "Not actuarial, legal, tax, or benefits advice."
 )
+DEMO_PLANS_REPLACED = (
+    "The demonstration plans were replaced with the current plan and one proposed plan."
+)
 STYLES = Path(__file__).resolve().parent / "styles.css"
 
 BADGES = {
@@ -101,6 +104,17 @@ def load_demo() -> None:
     inputs_changed()
     reset_forms()
     run_and_store()
+
+
+def leave_demo() -> bool:
+    state = st.session_state
+    if state.alternatives != demo.demo_alternatives():
+        return False
+    state.alternatives = [demo.proposed_plan()]
+    state.focus_plan = None
+    state.analysis = None
+    reset_forms()
+    return True
 
 
 def run_and_store() -> AnalysisResult:
