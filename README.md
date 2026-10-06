@@ -154,10 +154,10 @@ The same app is packaged as an installable program for macOS and Windows. It car
 
 | System | Installer | How to install |
 |---|---|---|
-| macOS (Apple silicon) | `BenefitDesignStressLab-macOS.dmg` | Open the disk image and drag the app to Applications |
-| Windows 10 and 11 (64-bit) | `BenefitDesignStressLab-Setup.exe` | Run the installer. It adds a Start-menu entry and an optional desktop shortcut |
+| macOS (Apple silicon) | [`BenefitDesignStressLab-macOS.dmg`](https://github.com/QBranch800/Employee-Benefit-Design-Stress-Lab/releases/latest/download/BenefitDesignStressLab-macOS.dmg) | Open the disk image and drag the app to Applications |
+| Windows 10 and 11 (64-bit) | [`BenefitDesignStressLab-Setup.exe`](https://github.com/QBranch800/Employee-Benefit-Design-Stress-Lab/releases/latest/download/BenefitDesignStressLab-Setup.exe) | Run the installer. It adds a Start-menu entry and an optional desktop shortcut |
 
-The `desktop` workflow builds both installers on GitHub, runs a self-test inside each packaged app, and attaches them to every [release](https://github.com/QBranch800/Employee-Benefit-Design-Stress-Lab/releases).
+The `desktop` workflow builds both installers on GitHub, runs a self-test inside each packaged app, and attaches them to every [release](https://github.com/QBranch800/Employee-Benefit-Design-Stress-Lab/releases). The links above always point to the latest one.
 
 The installers are not code-signed, so the first launch shows a warning:
 
