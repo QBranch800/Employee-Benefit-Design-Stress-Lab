@@ -420,13 +420,21 @@ with sensitivity_tab:
             required=True,
             label_visibility="collapsed",
         )
+        measure, _, unit = charts.SENSITIVITY_METRICS[metric]
+        st.caption(f"{measure}, {unit}")
         ui.plot(charts.sensitivity_heatmap(grid, metric, pal))
-        same = int((grid["label"] == alt["label"]).sum())
-        st.caption(
-            f"The assessment stays “{alt['label']}” in {same} of {len(grid)} combinations. "
-            "Deductibles and maximums stay fixed in money terms, so higher costs push more of "
-            "the bill onto employees."
-        )
+        if grid[metric].round(1).nunique() == 1:
+            st.caption(
+                f"{measure} is the same in every combination here, because it does not depend "
+                "on how much care employees use."
+            )
+        else:
+            same = int((grid["label"] == alt["label"]).sum())
+            st.caption(
+                f"The assessment stays “{alt['label']}” in {same} of {len(grid)} combinations. "
+                "Deductibles and maximums stay fixed in money terms, so higher costs push more "
+                "of the bill onto employees."
+            )
         ui.table_view(
             ui.display_frame(
                 grid.rename(
