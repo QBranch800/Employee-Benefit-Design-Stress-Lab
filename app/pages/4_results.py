@@ -97,7 +97,7 @@ def segment_table(
     )
 
 
-stress = "baseline assumptions" if result.assumptions.is_baseline() else "stressed assumptions"
+stress = "Baseline Assumptions" if result.assumptions.is_baseline() else "Stressed Assumptions"
 meta = (
     f"{len(result.workforce):,} employees · {len(result.plans)} plans · {stress} · "
     f"run {result.run_at:%d %b %Y, %H:%M} UTC"
