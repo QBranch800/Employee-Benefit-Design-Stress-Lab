@@ -8,14 +8,73 @@
   const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const dark = canvas.dataset.mode === "dark";
   const period = Number(canvas.dataset.period) * 1000;
-  const { tilt, distance, unit, middle } = model.camera;
+  const degree = Math.PI / 180;
+  const tilt = model.camera.tilt * degree;
+  const { distance, unit, middle } = model.camera;
   const frame = model.frame;
   const steps = 16;
+  const shape = ["span", "radius", "top", "bottom"];
 
-  function tint(patch, colour) {
-    if (!dark || patch.kind === "solid") return colour;
-    const red = parseInt(colour.slice(1, 3), 16);
-    return `rgba(46, 134, 255, ${Math.max(0, 1 - red / 255).toFixed(3)})`;
+  const rings = model.rings.map((ring) => ({
+    kind: ring.kind,
+    slots: ring.slots.map((slot) => ({
+      ...slot,
+      colours: slot.colours.map((colour) =>
+        [1, 3, 5].map((at) => parseInt(colour.slice(at, at + 2), 16)),
+      ),
+    })),
+  }));
+
+  function value(slots, index, key) {
+    const count = slots.length;
+    const slot = slots[((index % count) + count) % count];
+    return key === "centre" ? slot.centre + 360 * Math.floor(index / count) : slot[key];
+  }
+
+  function glide(slots, index, key, part) {
+    const from = value(slots, index, key);
+    const to = value(slots, index + 1, key);
+    const leave = (to - value(slots, index - 1, key)) / 2;
+    const arrive = (value(slots, index + 2, key) - from) / 2;
+    const square = part * part;
+    const cube = square * part;
+    return (
+      (2 * cube - 3 * square + 1) * from +
+      (cube - 2 * square + part) * leave +
+      (3 * square - 2 * cube) * to +
+      (cube - square) * arrive
+    );
+  }
+
+  function planes(turn) {
+    const list = [];
+    for (const ring of rings) {
+      const count = ring.slots.length;
+      for (let plane = 0; plane < count; plane += 1) {
+        const place = plane + turn * count;
+        const index = Math.floor(place);
+        const part = place - index;
+        const item = { kind: ring.kind, centre: glide(ring.slots, index, "centre", part) };
+        for (const key of shape) item[key] = glide(ring.slots, index, key, part);
+        const from = ring.slots[index % count].colours;
+        const to = ring.slots[(index + 1) % count].colours;
+        item.colours = from.map((stop, at) =>
+          stop.map((channel, band) => Math.round(channel + (to[at][band] - channel) * part)),
+        );
+        list.push(item);
+      }
+    }
+    return list;
+  }
+
+  function paint(kind, [red, green, blue]) {
+    const alpha = 1 - red / 255;
+    if (kind === "glass") {
+      return dark ? `rgba(46, 134, 255, ${alpha.toFixed(3)})` : `rgb(${red}, ${green}, ${blue})`;
+    }
+    if (alpha < 0.01) return "rgba(0, 0, 0, 0)";
+    const lift = (channel) => Math.round((channel - red) / alpha);
+    return `rgba(0, ${lift(green)}, ${lift(blue)}, ${alpha.toFixed(3)})`;
   }
 
   function project(radius, angle, level, scale, centreX, centreY) {
@@ -27,19 +86,19 @@
     return [centreX + x * zoom * scale, centreY + y * zoom * scale, depth];
   }
 
-  function outline(patch, turn, scale, centreX, centreY) {
+  function outline(item, scale, centreX, centreY) {
     const upper = [];
     const lower = [];
     let depth = 0;
     for (let step = 0; step <= steps; step += 1) {
-      const angle = patch.start + ((patch.end - patch.start) * step) / steps + turn;
-      const high = project(patch.radius, angle, patch.top, scale, centreX, centreY);
-      const low = project(patch.radius, angle, patch.bottom, scale, centreX, centreY);
+      const angle = (item.centre + item.span * (step / steps - 0.5)) * degree;
+      const high = project(item.radius, angle, item.top, scale, centreX, centreY);
+      const low = project(item.radius, angle, item.bottom, scale, centreX, centreY);
       upper.push(high);
       lower.push(low);
       depth += high[2] + low[2];
     }
-    return { patch, upper, lower, depth };
+    return { item, upper, lower, depth };
   }
 
   function draw(turn) {
@@ -56,18 +115,17 @@
     const scale = unit * fit;
     const centreX = width / 2;
     const centreY = height / 2 + (middle - frame.centre) * fit;
-    const shapes = model.patches.map((patch) => outline(patch, turn, scale, centreX, centreY));
+    const shapes = planes(turn).map((item) => outline(item, scale, centreX, centreY));
     shapes.sort((a, b) => a.depth - b.depth);
 
-    for (const shape of shapes) {
-      const { patch, upper, lower } = shape;
+    for (const { item, upper, lower } of shapes) {
       const head = upper[steps / 2];
       const foot = lower[steps / 2];
       const fill = context.createLinearGradient(head[0], head[1], foot[0], foot[1]);
-      patch.colours.forEach((colour, index) => {
-        fill.addColorStop(index / (patch.colours.length - 1), tint(patch, colour));
+      item.colours.forEach((colour, index) => {
+        fill.addColorStop(index / (item.colours.length - 1), paint(item.kind, colour));
       });
-      context.globalCompositeOperation = patch.kind === "glass" && !dark ? "multiply" : "source-over";
+      context.globalCompositeOperation = item.kind === "glass" && !dark ? "multiply" : "source-over";
       context.beginPath();
       upper.forEach(([x, y], step) => (step ? context.lineTo(x, y) : context.moveTo(x, y)));
       for (let step = steps; step >= 0; step -= 1) context.lineTo(lower[step][0], lower[step][1]);
@@ -83,7 +141,7 @@
   function tick(now) {
     if (!canvas.isConnected) return;
     if (started === null) started = now;
-    draw(still ? 0 : (((now - started) % period) / period) * Math.PI * 2);
+    draw(still ? 0 : ((now - started) % period) / period);
     if (!still) window.bslRingFrame = requestAnimationFrame(tick);
   }
 
