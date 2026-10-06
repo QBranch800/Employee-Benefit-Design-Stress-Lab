@@ -1,11 +1,53 @@
 [data-testid="stMainBlockContainer"] {
   max-width: 1180px;
-  padding-top: 5.75rem;
+  padding-top: 3.75rem;
   padding-bottom: 4rem;
 }
 
 [data-testid="stHeader"] {
-  border-bottom: 1px solid var(--bsl-border);
+  background: transparent;
+}
+
+[data-testid="stSidebar"] {
+  width: 236px !important;
+  min-width: 236px !important;
+  border-right: 1px solid var(--bsl-border);
+}
+
+[data-testid="stSidebarResizeHandle"] {
+  display: none;
+}
+
+[data-testid="stSidebarHeader"] {
+  padding: 1.5rem 1.25rem 0.75rem;
+}
+
+[data-testid="stSidebarLogo"] {
+  height: 2.75rem;
+  width: 2.75rem;
+  border-radius: 22%;
+}
+
+[data-testid="stSidebarNavItems"] {
+  padding: 0.5rem 0.75rem;
+}
+
+[data-testid="stSidebarNavLink"] {
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+}
+
+[data-testid="stSidebarNavLink"] p {
+  font-size: 14px;
+}
+
+[data-testid="stSidebarNavLink"] span[label="Home"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 h1 {
@@ -61,25 +103,58 @@ h4 {
 }
 
 .bsl-hero {
-  padding: 1.75rem 0 0.25rem;
+  padding: 2.5rem 0 0.75rem;
 }
 
 .bsl-hero h1 {
-  font-size: 2.875rem;
-  line-height: 1.06;
-  letter-spacing: -0.045em;
-  font-weight: 600;
+  font-size: clamp(2.375rem, 3.6vw, 3.25rem);
+  line-height: 1.04;
+  text-wrap: balance;
+  letter-spacing: -0.05em;
+  font-weight: 650;
   color: var(--bsl-text);
-  margin: 0.75rem 0 1rem;
-  max-width: 20ch;
+  margin: 0 0 1.1rem;
 }
 
 .bsl-hero p {
-  font-size: 1.0625rem;
-  line-height: 1.6;
+  font-size: 1.5rem;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
   color: var(--bsl-secondary);
-  max-width: 62ch;
   margin: 0;
+}
+
+.bsl-emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  perspective: 900px;
+}
+
+.bsl-emblem img {
+  width: min(300px, 78%);
+  height: auto;
+  filter: drop-shadow(0 26px 34px rgba(16, 60, 120, 0.2));
+  animation: bsl-hover 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes bsl-hover {
+  0%,
+  100% {
+    transform: translateY(0) rotateX(2deg) rotateY(-14deg);
+  }
+
+  50% {
+    transform: translateY(-16px) rotateX(-2deg) rotateY(14deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bsl-emblem img {
+    animation: none;
+  }
 }
 
 .bsl-page-title {
@@ -100,6 +175,7 @@ h4 {
 }
 
 .bsl-steps {
+  margin-top: 2.5rem;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   border: 1px solid var(--bsl-border);
@@ -406,6 +482,6 @@ ul.bsl-list li::before {
   }
 
   .bsl-hero h1 {
-    font-size: 2.125rem;
+    font-size: 2.375rem;
   }
 }
