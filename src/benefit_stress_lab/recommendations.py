@@ -108,7 +108,7 @@ def candidate_mitigations(
                 ),
                 plan=_variant(
                     proposal,
-                    "low-pay subsidy",
+                    "Low-Pay Subsidy",
                     salary_subsidy={
                         "salary_below": low_pay_threshold,
                         "employer_contribution_pct": current_max_pct,
@@ -134,7 +134,7 @@ def candidate_mitigations(
                 ),
                 plan=_variant(
                     proposal,
-                    "deductible allowance",
+                    "Deductible Allowance",
                     tiers={
                         t: {"employer_allowance": prop[t].employer_allowance + increases[t]}
                         for t in tiers
@@ -153,7 +153,7 @@ def candidate_mitigations(
                     f"Family coverage keeps the current {pct:g}% employer premium contribution."
                 ),
                 plan=_variant(
-                    proposal, "family support", tiers={"family": {"employer_contribution_pct": pct}}
+                    proposal, "Family Support", tiers={"family": {"employer_contribution_pct": pct}}
                 ),
             )
         )
@@ -177,7 +177,7 @@ def candidate_mitigations(
                 ),
                 plan=_variant(
                     proposal,
-                    "current OOP max",
+                    "Current OOP Max",
                     tiers={t: {"out_of_pocket_max": new_max[t]} for t in tiers},
                 ),
             )
@@ -199,7 +199,7 @@ def candidate_mitigations(
                 ),
                 plan=_variant(
                     proposal,
-                    "smaller cut",
+                    "Smaller Cut",
                     tiers={t: {"employer_contribution_pct": midpoint[t]} for t in tiers},
                 ),
             )

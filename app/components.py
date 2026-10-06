@@ -155,6 +155,7 @@ def switch_to(key: str) -> None:
 
 def apply_styles() -> None:
     pal = theme.palette()
+    dark = pal.mode == "dark"
     tokens = {
         "surface": pal.surface,
         "card": pal.card,
@@ -171,6 +172,8 @@ def apply_styles() -> None:
         "warn-soft": pal.warn_soft,
         "bad": pal.bad,
         "bad-soft": pal.bad_soft,
+        "glass-top": "rgba(90, 165, 255, 0.58)" if dark else "rgba(133, 189, 253, 0.62)",
+        "glass-bottom": "rgba(60, 140, 255, 0.4)" if dark else "rgba(178, 211, 252, 0.5)",
     }
     variables = "".join(f"--bsl-{name}:{value};" for name, value in tokens.items())
     st.html(f"<style>:root{{{variables}}}\n{STYLES.read_text(encoding='utf-8')}</style>")

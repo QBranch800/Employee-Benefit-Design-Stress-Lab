@@ -22,9 +22,9 @@ The demonstration compares a current plan with three alternatives on 500 synthet
 
 | Plan | Employer saving | Change in share above threshold | Assessment |
 |---|---:|---:|---|
-| A: Modest adjustment | 6.0% | +1.6 pp | Balanced |
-| B: Proposed cost shift | 27.1% | +15.6 pp | Savings achieved; employee risk increased |
-| C: B + low-pay subsidy | 16.8% | +4.2 pp | Savings achieved; employee risk increased |
+| A: Modest Adjustment | 6.0% | +1.6 pp | Balanced |
+| B: Proposed Cost Shift | 27.1% | +15.6 pp | Savings achieved; employee risk increased |
+| C: B + Low-Pay Subsidy | 16.8% | +4.2 pp | Savings achieved; employee risk increased |
 
 Plan B saves the employer $1,049,750 a year. The average employee pays $1,436 more, which sounds manageable. The breakdown shows where it lands: employees with family coverage earning below $40,000 see their median burden rise by $1,842, or 6.7 percentage points of salary.
 
