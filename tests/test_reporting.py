@@ -132,10 +132,10 @@ def test_simulation_export_holds_aggregates_only(result):
     table = reporting.simulation_table(simulated)
     assert list(table.index) == result.plan_names
     assert (table["Simulated years"] == 60).all()
-    assert (
-        table.loc[result.alternative_names[0], "% above threshold, typical year"]
-        == (simulated.summary.loc[result.alternative_names[0], "above_threshold_pct_typical"])
-    )
+    for column, label in reporting.SIMULATION_TABLE_COLUMNS.items():
+        assert table[label].equals(simulated.summary[column].rename(label))
+    assert "Employer saving, 5th percentile" in table.columns
+    assert "Employer saving, 95th percentile" in table.columns
 
     archive = zipfile.ZipFile(io.BytesIO(reporting.export_bundle(result, None, simulated)))
     assert {"simulation.csv", "simulation_settings.csv"} <= set(archive.namelist())

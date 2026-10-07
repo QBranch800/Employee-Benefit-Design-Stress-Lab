@@ -84,6 +84,8 @@ SIMULATION_TABLE_COLUMNS: dict[str, str] = {
     "employer_cost_low": "Employer cost, 5th percentile",
     "employer_cost_high": "Employer cost, 95th percentile",
     "employer_saving_typical": "Employer saving, typical year",
+    "employer_saving_low": "Employer saving, 5th percentile",
+    "employer_saving_high": "Employer saving, 95th percentile",
     "employer_saving_pct_typical": "Employer saving %, typical year",
     "savings_target_met_pct": "Savings target met (% of years)",
     "material_increase_pct": "Material increase in share above threshold (% of years)",

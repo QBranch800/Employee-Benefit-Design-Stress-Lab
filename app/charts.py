@@ -290,6 +290,17 @@ def burden_ranges(
     return fig
 
 
+def _wrapped(name: str, width: int = 22) -> str:
+    if len(name) <= width:
+        return name
+    cut = name.rfind(" ", 0, width + 1)
+    if cut <= 0:
+        cut = name.find(" ", width)
+    if cut <= 0:
+        return name
+    return f"{name[:cut]}<br>{name[cut + 1 :]}"
+
+
 def simulated_ranges(spread: pd.DataFrame, colours: dict[str, str], pal: Palette) -> go.Figure:
     fig = go.Figure()
     hover = (
@@ -305,9 +316,15 @@ def simulated_ranges(spread: pd.DataFrame, colours: dict[str, str], pal: Palette
     fig.update_xaxes(
         title_text="Employees above the threshold",
         ticksuffix="%",
-        range=[max(0.0, low - 0.15 * span), high + 0.45 * span],
+        range=[max(0.0, low - 0.15 * span), min(100.0 + 0.45 * span, high + 0.45 * span)],
     )
-    fig.update_yaxes(showgrid=False, type="category")
+    fig.update_yaxes(
+        showgrid=False,
+        type="category",
+        tickmode="array",
+        tickvals=names,
+        ticktext=[_wrapped(name) for name in names],
+    )
     return fig
 
 

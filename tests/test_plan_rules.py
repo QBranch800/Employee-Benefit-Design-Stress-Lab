@@ -76,6 +76,13 @@ class TestPremiumShares:
         assert float(plan_rules.employer_premium_share(6_000, 100)) == 6_000
         assert float(plan_rules.employee_premium_share(6_000, 100)) == 0
 
+    @pytest.mark.parametrize("factor", [0.94, 1.19, 1.44])
+    def test_full_employer_contribution_never_goes_negative(self, factor):
+        premium = 5_640 * factor
+        share = float(plan_rules.employee_premium_share(premium, 100))
+        assert share == 0
+        assert float(plan_rules.total_employee_burden(share, 0)) == 0
+
     @pytest.mark.parametrize("pct", [-1, 100.1])
     def test_percentage_outside_range_is_rejected(self, pct):
         with pytest.raises(ValueError):

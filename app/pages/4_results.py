@@ -58,6 +58,20 @@ def money(value: float, signed: bool = False) -> str:
     return formatting.money(value, symbol, signed=signed)
 
 
+def span(low: float, high: float, fmt) -> str:
+    return fmt(low) if fmt(low) == fmt(high) else f"{fmt(low)} to {fmt(high)}"
+
+
+def year_range(low: float, high: float, fmt) -> str:
+    if fmt(low) == fmt(high):
+        return "The same in every simulated year"
+    return f"{span(low, high, fmt)} in 9 years out of 10"
+
+
+def share_of_years(value: float) -> str:
+    return formatting.MISSING if pd.isna(value) else f"{value:.0f}% of years"
+
+
 def plans_overview() -> None:
     shown = ui.display_frame(
         plan_table[list(PLAN_COLUMNS)].rename(columns=PLAN_COLUMNS).reset_index(),
@@ -125,7 +139,9 @@ if not names:
 
 focus = names.index(state.focus_plan) if state.focus_plan in names else 0
 plan_name = picker.selectbox("Compare with the current plan", names, index=focus)
-state.focus_plan = plan_name
+if plan_name != state.focus_plan:
+    state.focus_plan = plan_name
+    st.rerun()
 base = summary.iloc[0]
 alt = summary.loc[plan_name]
 
@@ -533,23 +549,24 @@ with uncertainty_tab:
             ui.Kpi(
                 f"Above {threshold} of salary, typical year",
                 formatting.pct(odds["above_threshold_pct_typical"]),
-                note=(
-                    f"{formatting.pct(odds['above_threshold_pct_low'])} to "
-                    f"{formatting.pct(odds['above_threshold_pct_high'])} in 9 years out of 10"
+                note=year_range(
+                    odds["above_threshold_pct_low"],
+                    odds["above_threshold_pct_high"],
+                    formatting.pct,
                 ),
             ),
             ui.Kpi(
                 "Change against the current plan",
                 formatting.pp(odds["above_threshold_change_pp_typical"]),
-                note=(
-                    f"{formatting.pp(odds['above_threshold_change_pp_low'])} to "
-                    f"{formatting.pp(odds['above_threshold_change_pp_high'])} "
-                    "in 9 years out of 10"
+                note=year_range(
+                    odds["above_threshold_change_pp_low"],
+                    odds["above_threshold_change_pp_high"],
+                    formatting.pp,
                 ),
             ),
             ui.Kpi(
                 "Savings target met",
-                f"{odds['savings_target_met_pct']:.0f}% of years",
+                share_of_years(odds["savings_target_met_pct"]),
                 note=(
                     f"Typical saving {typical_saving} against a "
                     f"{settings.savings_target_pct:g}% target"
@@ -557,7 +574,7 @@ with uncertainty_tab:
             ),
             ui.Kpi(
                 "Assessment unchanged",
-                f"{odds['label_held_pct']:.0f}% of years",
+                share_of_years(odds["label_held_pct"]),
                 note=ui.BADGES.get(odds["label"], ("neutral", odds["label"]))[1],
             ),
         ],
@@ -566,13 +583,21 @@ with uncertainty_tab:
 
     spread_column, chance_column = st.columns(2, gap="medium")
     with spread_column, ui.card("fill-spread"):
-        ui.card_title(
-            "Employees above the threshold, year by year",
-            "The thick bar covers half of the simulated years and the thin line 9 years in "
-            "10. The gap in the bar marks the typical year, which is the figure shown.",
-        )
         spread = simulated.spread("above_threshold_pct")
-        ui.plot(charts.simulated_ranges(spread, colours, pal))
+        if float((spread["p95"] - spread["p5"]).max()) < 0.05:
+            ui.card_title("Employees above the threshold, year by year")
+            ui.note(
+                "Every simulated year gives the same share for each plan, so there is no "
+                "range to draw. The figures are in the table below.",
+                strong="No variation.",
+            )
+        else:
+            ui.card_title(
+                "Employees above the threshold, year by year",
+                "The thick bar covers half of the simulated years and the thin line 9 years "
+                "in 10. The gap in the bar marks the typical year, which is the figure shown.",
+            )
+            ui.plot(charts.simulated_ranges(spread, colours, pal))
         shown = spread.rename(
             columns={
                 "p5": "5th percentile",
@@ -629,20 +654,19 @@ with uncertainty_tab:
                 {
                     "Plan": name,
                     "Typical year": formatting.pct(row["above_threshold_pct_typical"]),
-                    "9 years in 10": (
-                        f"{formatting.pct(row['above_threshold_pct_low'])} to "
-                        f"{formatting.pct(row['above_threshold_pct_high'])}"
+                    "9 years in 10": span(
+                        row["above_threshold_pct_low"],
+                        row["above_threshold_pct_high"],
+                        formatting.pct,
                     ),
                     "Target met": (
                         formatting.MISSING
                         if reference
-                        else f"{row['savings_target_met_pct']:.0f}% of years"
+                        else share_of_years(row["savings_target_met_pct"])
                     ),
                     "Assessment": row["label"],
                     "Unchanged in": (
-                        formatting.MISSING
-                        if reference
-                        else f"{row['label_held_pct']:.0f}% of years"
+                        formatting.MISSING if reference else share_of_years(row["label_held_pct"])
                     ),
                 }
             )
@@ -652,7 +676,10 @@ with uncertainty_tab:
             badges=["Assessment"],
             strong=["Plan"],
         )
-        if float(odds["employer_cost_high"] - odds["employer_cost_low"]) < 1:
+        cost_range = (
+            simulated.summary["employer_cost_high"] - simulated.summary["employer_cost_low"]
+        )
+        if float(cost_range.max()) < 1:
             st.caption(
                 "The employer's cost is the same in every simulated year because it is made up "
                 "of premiums, which do not depend on how much care employees use."

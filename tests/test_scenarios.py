@@ -126,6 +126,20 @@ def test_sensitivity_grid_is_monotonic(workforce, current, proposed):
     assert baseline_cell["above_threshold_pct"] == pytest.approx(direct["above_threshold_pct"])
 
 
+@pytest.mark.parametrize("change", [-6, 19, 44])
+def test_contribution_sweep_survives_scaled_premiums(workforce, change):
+    stressed = run_analysis(
+        workforce,
+        demo.current_plan(),
+        demo.demo_alternatives(),
+        assumptions=StressAssumptions(healthcare_cost_change_pct=change),
+    )
+    sweep = contribution_sweep(stressed, "A: Modest Adjustment")
+    full = sweep[sweep["employer_contribution_pct"] == 100].iloc[0]
+    assert np.isfinite(full["employer_saving"])
+    assert np.isfinite(full["above_threshold_pct"])
+
+
 def test_contribution_sweep_trades_saving_for_affordability(workforce, current, proposed):
     result = run_analysis(workforce, current, [proposed])
     sweep = contribution_sweep(result, proposed.name, (60, 70, 80))

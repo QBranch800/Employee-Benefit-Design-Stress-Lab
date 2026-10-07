@@ -3,8 +3,9 @@ import pytest
 from pydantic import ValidationError
 
 from benefit_stress_lab import demo, simulation
+from benefit_stress_lab.calculations import EPSILON
 from benefit_stress_lab.scenarios import run_analysis
-from benefit_stress_lab.schemas import AnalysisSettings, SimulationSettings
+from benefit_stress_lab.schemas import AnalysisSettings, SimulationSettings, StressAssumptions
 from benefit_stress_lab.simulation import run_simulation, simulate_costs
 
 FIXED = {"reshuffle_costs": False, "individual_variation_pct": 0, "cost_level_variation_pct": 0}
@@ -179,16 +180,131 @@ def test_saving_target_odds_follow_the_target(workforce):
     assert 0 <= row["material_increase_pct"] <= 100
 
 
-def test_segment_chances_hide_small_groups(simulated, result):
-    segments = simulated.segments(["salary_band", "coverage_tier"])
-    assert set(segments["plan_name"]) == set(result.plan_names)
-    small = segments[segments["headcount"] < result.settings.min_group_size]
+def test_segment_chances_hide_small_groups(workforce):
+    settings = AnalysisSettings(min_group_size=40)
+    analysis = run_analysis(workforce, demo.current_plan(), demo.demo_alternatives(), settings)
+    simulated = run_simulation(analysis, SimulationSettings(runs=60))
+    segments = simulated.segments(["salary_band"])
+    assert set(segments["plan_name"]) == set(analysis.plan_names)
+    small = segments[segments["headcount"] < 40]
+    assert len(small) >= len(analysis.plan_names)
     assert small["suppressed"].all()
-    assert small["chance_above_pct"].isna().all()
+    for column in ("chance_above_pct", "baseline_chance_above_pct", "chance_change_pp"):
+        assert small[column].isna().all()
     shown = segments[~segments["suppressed"]]
+    assert len(shown) > 0
     assert shown["chance_above_pct"].between(0, 100).all()
     per_plan = segments.groupby("plan_name")["headcount"].sum()
-    assert (per_plan == len(result.workforce)).all()
+    assert (per_plan == len(analysis.workforce)).all()
+
+
+@pytest.fixture(scope="module")
+def stressed(workforce):
+    with_allowance = demo.proposed_plan("With Allowance").with_tier_changes(
+        employee_only={"employer_allowance": 500}, family={"employer_allowance": 1_000}
+    )
+    return run_analysis(
+        workforce,
+        demo.current_plan(),
+        [demo.scenario_a_balanced(), with_allowance],
+        AnalysisSettings(
+            affordability_threshold_pct=7.5, savings_target_pct=12, material_increase_pp=1
+        ),
+        StressAssumptions(
+            healthcare_cost_change_pct=12, high_use_shift_pct=10, salary_growth_pct=3
+        ),
+    )
+
+
+def test_fixed_simulation_matches_a_stressed_single_run(stressed):
+    fixed = run_simulation(stressed, SimulationSettings(runs=50, **FIXED))
+    single = stressed.summary
+    pairs = {
+        "above_threshold_pct": "above_threshold_pct",
+        "above_threshold_change_pp": "above_threshold_change_pp",
+        "employer_cost": "employer_cost_total",
+        "employer_saving": "employer_saving",
+        "employer_saving_pct": "employer_saving_pct",
+        "mean_burden": "mean_burden",
+    }
+    for metric, column in pairs.items():
+        for point in simulation.RANGE_POINTS:
+            np.testing.assert_allclose(fixed.summary[f"{metric}_{point}"], single[column])
+    np.testing.assert_allclose(fixed.summary["single_employer_cost"], single["employer_cost_total"])
+    np.testing.assert_allclose(fixed.summary["single_employer_saving"], single["employer_saving"])
+    np.testing.assert_allclose(
+        fixed.summary["single_above_threshold_pct"], single["above_threshold_pct"]
+    )
+    assert (fixed.summary["label"] == single["label"]).all()
+    assert (fixed.summary["label_held_pct"] == 100).all()
+
+    alternatives = single.iloc[1:]
+    target_met = alternatives["employer_saving_pct"] >= stressed.settings.savings_target_pct
+    material = alternatives["above_threshold_change_pp"] > stressed.settings.material_increase_pp
+    assert target_met.any() and not target_met.all()
+    np.testing.assert_allclose(
+        fixed.summary["savings_target_met_pct"].iloc[1:], target_met.astype(float) * 100
+    )
+    np.testing.assert_allclose(
+        fixed.summary["material_increase_pct"].iloc[1:], material.astype(float) * 100
+    )
+
+
+def test_fixed_simulation_matches_single_run_segments(stressed):
+    fixed = run_simulation(stressed, SimulationSettings(runs=50, **FIXED))
+    keys = ["plan_name", "salary_band"]
+    chances = fixed.segments(["salary_band"]).set_index(keys)
+    single = stressed.segments(["salary_band"]).set_index(keys)
+    shown = chances[~chances["suppressed"]]
+    assert len(shown) > 0
+    np.testing.assert_allclose(
+        shown["chance_above_pct"], single.loc[shown.index, "above_threshold_pct"]
+    )
+    baseline = single.loc[stressed.baseline_name, "above_threshold_pct"]
+    for name in stressed.alternative_names:
+        expected = single.loc[name, "above_threshold_pct"] - baseline
+        got = chances.loc[name, "chance_change_pp"]
+        np.testing.assert_allclose(got.dropna(), expected.loc[got.dropna().index])
+        assert (got.dropna() != 0).any()
+
+
+def test_year_table_is_internally_consistent(simulated, result):
+    years = simulated.years
+    base = years[years["plan_name"] == result.baseline_name].set_index("year")
+    settings = result.settings
+    for name in result.alternative_names:
+        plan = years[years["plan_name"] == name].set_index("year")
+        np.testing.assert_allclose(
+            plan["employer_saving"], base["employer_cost"] - plan["employer_cost"]
+        )
+        np.testing.assert_allclose(
+            plan["employer_saving_pct"], plan["employer_saving"] / base["employer_cost"] * 100
+        )
+        np.testing.assert_allclose(
+            plan["above_threshold_change_pp"],
+            plan["above_threshold_pct"] - base["above_threshold_pct"],
+        )
+        row = simulated.summary.loc[name]
+        material = plan["above_threshold_change_pp"] > settings.material_increase_pp + EPSILON
+        assert row["material_increase_pct"] == pytest.approx(material.mean() * 100)
+        met = plan["employer_saving_pct"] >= settings.savings_target_pct - EPSILON
+        assert row["savings_target_met_pct"] == pytest.approx(met.mean() * 100)
+        held = plan["label"] == result.summary.loc[name, "label"]
+        assert row["label_held_pct"] == pytest.approx(held.mean() * 100)
+    odds = simulated.summary["material_increase_pct"].iloc[1:]
+    assert ((odds > 0) & (odds < 100)).any()
+    assert (simulated.summary["label_held_pct"].iloc[1:] < 100).any()
+
+
+def test_zero_cost_baseline_gives_missing_saving_share_without_warnings(workforce, recwarn):
+    free = demo.current_plan().with_tier_changes(
+        employee_only={"employer_contribution_pct": 0}, family={"employer_contribution_pct": 0}
+    )
+    analysis = run_analysis(workforce, free, [demo.proposed_plan()])
+    row = run_simulation(analysis, SimulationSettings(runs=50)).summary.loc["Proposed Plan"]
+    assert np.isnan(row["employer_saving_pct_typical"])
+    assert np.isfinite(row["above_threshold_pct_typical"])
+    assert not [warning for warning in recwarn if issubclass(warning.category, RuntimeWarning)]
 
 
 def test_segment_chances_average_to_the_simulated_share(simulated):

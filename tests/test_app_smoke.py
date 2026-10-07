@@ -5,6 +5,7 @@ from streamlit.testing.v1 import AppTest
 
 import components as ui
 from benefit_stress_lab.scenarios import run_analysis
+from benefit_stress_lab.schemas import SimulationSettings
 
 APP = Path(__file__).resolve().parents[1] / "app"
 PAGES = [
@@ -78,6 +79,25 @@ def test_results_switch_alternative():
     at.selectbox[0].select("A: Modest Adjustment").run()
     assert not at.exception
     assert at.session_state["focus_plan"] == "A: Modest Adjustment"
+
+
+def test_results_follow_consecutive_plan_choices():
+    at = open_page("pages/4_results.py", with_demo=True)
+    for name in ("C: B + Low-Pay Subsidy", "A: Modest Adjustment", "B: Proposed Cost Shift"):
+        at.selectbox[0].select(name).run()
+        assert not at.exception
+        assert at.session_state["focus_plan"] == name
+        assert at.selectbox[0].value == name
+
+
+def test_results_without_simulated_variation():
+    at = open_page("pages/4_results.py", with_demo=True)
+    at.session_state["simulation_settings"] = SimulationSettings(
+        reshuffle_costs=False, individual_variation_pct=0, cost_level_variation_pct=0
+    )
+    at.run()
+    assert not at.exception
+    assert len(at.tabs) == 6
 
 
 def test_changing_the_simulation_settings():

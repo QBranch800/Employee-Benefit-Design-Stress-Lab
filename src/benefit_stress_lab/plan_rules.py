@@ -28,7 +28,7 @@ def employer_premium_share(annual_premium: ArrayLike, employer_pct: ArrayLike) -
 
 def employee_premium_share(annual_premium: ArrayLike, employer_pct: ArrayLike) -> np.ndarray:
     premium = _as_non_negative(annual_premium, "Annual premium")
-    return premium - employer_premium_share(premium, employer_pct)
+    return np.maximum(premium - employer_premium_share(premium, employer_pct), 0.0)
 
 
 def out_of_pocket(

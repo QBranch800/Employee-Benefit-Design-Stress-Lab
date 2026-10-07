@@ -151,10 +151,10 @@ Salaries, coverage tiers, plan rules, and premiums stay fixed. Every plan is eva
 
 For each plan the simulation reports:
 
-- the typical year (the median) and the 5th and 95th percentiles of the employer's cost, the employer's saving, and the share of employees above the threshold;
+- the typical year (the median) and the 5th and 95th percentiles of the share of employees above the threshold, and the same three figures for the employer's cost and saving in the export;
 - the share of years in which the saving meets the target, and in which the share above the threshold rises by more than the materiality limit;
 - the share of years that earn the same assessment label as the single run;
-- for each salary band and coverage tier, the average share of years in which an employee is above the threshold. Small groups are withheld as elsewhere.
+- for each salary band, the average share of years in which an employee is above the threshold. Small groups are withheld as elsewhere.
 
 What the simulation does not do:
 

@@ -150,6 +150,11 @@ def _year_table(
     return years
 
 
+def _percentile(values: pd.Series, percentile: float) -> float:
+    known = values.dropna()
+    return float(np.percentile(known, percentile)) if len(known) else float("nan")
+
+
 def _summarise(years: pd.DataFrame, result: AnalysisResult) -> pd.DataFrame:
     settings = result.settings
     records = []
@@ -158,7 +163,7 @@ def _summarise(years: pd.DataFrame, result: AnalysisResult) -> pd.DataFrame:
         record: dict[str, object] = {"plan_name": name}
         for metric in YEAR_METRICS:
             for point, percentile in RANGE_POINTS.items():
-                record[f"{metric}_{point}"] = float(np.nanpercentile(group[metric], percentile))
+                record[f"{metric}_{point}"] = _percentile(group[metric], percentile)
         is_baseline = name == result.baseline_name
         target_met = group["employer_saving_pct"] >= settings.savings_target_pct - EPSILON
         material = group["above_threshold_change_pp"] > settings.material_increase_pp + EPSILON

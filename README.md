@@ -127,7 +127,7 @@ The synthetic workforce is drawn from explicit distributions with a fixed seed. 
 
 ## Run it
 
-Requires Python 3.11 or later. The app runs in the browser on macOS, Windows, and Linux, and the tests run on all three on every push.
+Requires Python 3.12 or later. The app runs in the browser on macOS, Windows, and Linux, and the tests run on all three on every push.
 
 macOS and Linux:
 
@@ -190,7 +190,7 @@ pytest
 ruff check .
 ```
 
-The suite has 172 tests. They cover the cost-sharing rules, five employees calculated by hand, boundary cases, upload validation, reconciliation of segment totals to workforce totals, the stress scenarios, the uncertainty simulation, the exports, and a smoke test of every page.
+The suite has 184 tests. They cover the cost-sharing rules, five employees calculated by hand, boundary cases, upload validation, reconciliation of segment totals to workforce totals, the stress scenarios, the uncertainty simulation, the exports, and a smoke test of every page.
 
 ## Project layout
 
