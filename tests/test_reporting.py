@@ -7,6 +7,8 @@ import pytest
 from benefit_stress_lab import demo, formatting, reporting
 from benefit_stress_lab import recommendations as rec
 from benefit_stress_lab.scenarios import compare_variants, run_analysis
+from benefit_stress_lab.schemas import SimulationSettings
+from benefit_stress_lab.simulation import run_simulation
 
 
 @pytest.fixture
@@ -123,3 +125,22 @@ def test_plan_description_handles_mixed_changes():
     assert reporting.describe_changes(demo.current_plan(), plan) == (
         "Compared with Current Plan: different deductibles."
     )
+
+
+def test_simulation_export_holds_aggregates_only(result):
+    simulated = run_simulation(result, SimulationSettings(runs=60))
+    table = reporting.simulation_table(simulated)
+    assert list(table.index) == result.plan_names
+    assert (table["Simulated years"] == 60).all()
+    assert (
+        table.loc[result.alternative_names[0], "% above threshold, typical year"]
+        == (simulated.summary.loc[result.alternative_names[0], "above_threshold_pct_typical"])
+    )
+
+    archive = zipfile.ZipFile(io.BytesIO(reporting.export_bundle(result, None, simulated)))
+    assert {"simulation.csv", "simulation_settings.csv"} <= set(archive.namelist())
+    exported = pd.read_csv(io.BytesIO(archive.read("simulation.csv")), index_col=0)
+    assert len(exported) == len(result.plan_names)
+    assert "employee_id" not in archive.read("simulation.csv").decode()
+    settings = pd.read_csv(io.BytesIO(archive.read("simulation_settings.csv")))
+    assert str(settings.set_index("parameter").loc["Simulated years", "value"]) == "60"

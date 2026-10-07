@@ -172,7 +172,7 @@ def self_check() -> int:
     for key in STATE_KEYS:
         results.session_state[key] = home.session_state[key]
     results.run()
-    if results.exception or len(results.tabs) != 5:
+    if results.exception or len(results.tabs) != 6:
         print("Self-check failed: the results page did not render.", results.exception)
         return 1
 

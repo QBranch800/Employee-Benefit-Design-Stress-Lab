@@ -136,6 +136,16 @@ def test_ranges_are_ordered(simulated):
         assert (typical <= high + 1e-9).all()
 
 
+def test_spread_table_matches_the_summary(simulated, result):
+    spread = simulated.spread("above_threshold_pct")
+    assert list(spread.index) == result.plan_names
+    assert list(spread.columns) == ["p5", "p25", "median", "p75", "p95"]
+    assert (spread.diff(axis=1).iloc[:, 1:] >= -1e-9).all().all()
+    np.testing.assert_allclose(spread["median"], simulated.summary["above_threshold_pct_typical"])
+    np.testing.assert_allclose(spread["p5"], simulated.summary["above_threshold_pct_low"])
+    np.testing.assert_allclose(spread["p95"], simulated.summary["above_threshold_pct_high"])
+
+
 def test_baseline_has_no_saving_and_no_verdict_odds(simulated):
     baseline = simulated.summary.iloc[0]
     assert baseline["employer_saving_typical"] == 0

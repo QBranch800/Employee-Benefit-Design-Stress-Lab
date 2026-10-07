@@ -19,7 +19,13 @@ from benefit_stress_lab.recommendations import (
     LABEL_SHORTFALL,
 )
 from benefit_stress_lab.scenarios import AnalysisResult, run_analysis
-from benefit_stress_lab.schemas import AnalysisSettings, Plan, StressAssumptions, UtilisationCosts
+from benefit_stress_lab.schemas import (
+    AnalysisSettings,
+    Plan,
+    SimulationSettings,
+    StressAssumptions,
+    UtilisationCosts,
+)
 from benefit_stress_lab.synthetic import WorkforceSettings, generate_workforce
 
 APP_TITLE = "Benefit Design Stress Lab"
@@ -60,6 +66,7 @@ def _defaults() -> dict[str, Any]:
         "alternatives": [demo.proposed_plan()],
         "settings": AnalysisSettings(),
         "assumptions": StressAssumptions(),
+        "simulation_settings": SimulationSettings(),
         "analysis": None,
         "focus_plan": None,
         "inputs_version": 0,

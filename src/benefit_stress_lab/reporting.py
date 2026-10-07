@@ -9,6 +9,7 @@ from benefit_stress_lab import config, formatting
 from benefit_stress_lab.recommendations import PROPOSAL_KEY
 from benefit_stress_lab.scenarios import AnalysisResult
 from benefit_stress_lab.schemas import Plan
+from benefit_stress_lab.simulation import SimulationResult
 
 PLAN_TABLE_COLUMNS: dict[str, str] = {
     "headcount": "Headcount",
@@ -71,6 +72,25 @@ PLAN_CHANGES: dict[str, tuple[str, str, str]] = {
     ),
 }
 
+SIMULATION_TABLE_COLUMNS: dict[str, str] = {
+    "single_above_threshold_pct": "% above threshold, single run",
+    "above_threshold_pct_typical": "% above threshold, typical year",
+    "above_threshold_pct_low": "% above threshold, 5th percentile",
+    "above_threshold_pct_high": "% above threshold, 95th percentile",
+    "above_threshold_change_pp_typical": "Change in % above threshold (pp), typical year",
+    "above_threshold_change_pp_low": "Change in % above threshold (pp), 5th percentile",
+    "above_threshold_change_pp_high": "Change in % above threshold (pp), 95th percentile",
+    "employer_cost_typical": "Employer cost, typical year",
+    "employer_cost_low": "Employer cost, 5th percentile",
+    "employer_cost_high": "Employer cost, 95th percentile",
+    "employer_saving_typical": "Employer saving, typical year",
+    "employer_saving_pct_typical": "Employer saving %, typical year",
+    "savings_target_met_pct": "Savings target met (% of years)",
+    "material_increase_pct": "Material increase in share above threshold (% of years)",
+    "label": "Assessment, single run",
+    "label_held_pct": "Assessment unchanged (% of years)",
+}
+
 
 def plan_table(result: AnalysisResult) -> pd.DataFrame:
     table = result.summary[list(PLAN_TABLE_COLUMNS)].rename(columns=PLAN_TABLE_COLUMNS)
@@ -120,6 +140,27 @@ def assumptions_table(result: AnalysisResult) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["parameter", "value"]).astype({"value": str})
 
 
+def simulation_table(simulation: SimulationResult) -> pd.DataFrame:
+    table = simulation.summary[list(SIMULATION_TABLE_COLUMNS)].rename(
+        columns=SIMULATION_TABLE_COLUMNS
+    )
+    table.insert(0, "Simulated years", simulation.settings.runs)
+    table.index.name = "Plan"
+    return table
+
+
+def simulation_settings_table(simulation: SimulationResult) -> pd.DataFrame:
+    s = simulation.settings
+    rows = [
+        ("Simulated years", s.runs),
+        ("Costs reshuffled within coverage tier", s.reshuffle_costs),
+        ("Individual cost variation (%)", s.individual_variation_pct),
+        ("Year-wide cost variation (%)", s.cost_level_variation_pct),
+        ("Simulation random seed", s.seed),
+    ]
+    return pd.DataFrame(rows, columns=["parameter", "value"]).astype({"value": str})
+
+
 def plans_table(result: AnalysisResult) -> pd.DataFrame:
     return pd.concat([plan.to_frame() for plan in result.input_plans], ignore_index=True)
 
@@ -164,7 +205,11 @@ def to_csv_bytes(frame: pd.DataFrame, *, index: bool = False) -> bytes:
     return frame.to_csv(index=index).encode("utf-8")
 
 
-def export_bundle(result: AnalysisResult, mitigation_table: pd.DataFrame | None = None) -> bytes:
+def export_bundle(
+    result: AnalysisResult,
+    mitigation_table: pd.DataFrame | None = None,
+    simulation: SimulationResult | None = None,
+) -> bytes:
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("plan_summary.csv", to_csv_bytes(plan_table(result), index=True))
@@ -173,6 +218,13 @@ def export_bundle(result: AnalysisResult, mitigation_table: pd.DataFrame | None 
         archive.writestr("plans.csv", to_csv_bytes(plans_table(result)))
         if mitigation_table is not None:
             archive.writestr("mitigations.csv", to_csv_bytes(mitigation_table))
+        if simulation is not None:
+            archive.writestr(
+                "simulation.csv", to_csv_bytes(simulation_table(simulation), index=True)
+            )
+            archive.writestr(
+                "simulation_settings.csv", to_csv_bytes(simulation_settings_table(simulation))
+            )
         archive.writestr(
             "README.txt",
             "Benefit Design Stress Lab aggregate export.\n"

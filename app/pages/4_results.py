@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 import streamlit as st
+from pydantic import ValidationError
 
 import charts
 import components as ui
@@ -10,6 +11,8 @@ from benefit_stress_lab import config, formatting, reporting
 from benefit_stress_lab import recommendations as rec
 from benefit_stress_lab.affordability import burden_quantiles
 from benefit_stress_lab.scenarios import compare_variants, contribution_sweep, sensitivity_grid
+from benefit_stress_lab.schemas import SimulationSettings, format_validation_error
+from benefit_stress_lab.simulation import run_simulation
 
 PLAN_COLUMNS = {
     "Employer cost": "Employer cost",
@@ -21,6 +24,8 @@ PLAN_COLUMNS = {
     "Worse off": "Worse off",
     "Assessment": "Assessment",
 }
+
+SIMULATION_RUNS = (200, 500, 1_000, 2_000)
 
 SEGMENT_COLUMNS = {
     "headcount": "Employees",
@@ -174,8 +179,8 @@ ui.kpis(
     ]
 )
 
-overview_tab, people_tab, adjust_tab, sensitivity_tab, export_tab = st.tabs(
-    ["Overview", "Employees", "Adjustments", "Sensitivity", "Export"]
+overview_tab, people_tab, adjust_tab, sensitivity_tab, uncertainty_tab, export_tab = st.tabs(
+    ["Overview", "Employees", "Adjustments", "Sensitivity", "Uncertainty", "Export"]
 )
 
 with overview_tab:
@@ -509,6 +514,213 @@ with sensitivity_tab:
             )
         )
 
+with uncertainty_tab:
+    chosen = state.simulation_settings
+    with st.spinner("Simulating…"):
+        simulated = ui.cached(
+            "simulation", chosen.model_dump_json(), lambda: run_simulation(result, chosen)
+        )
+    odds = simulated.summary.loc[plan_name]
+    typical_saving = formatting.compact_money(odds["employer_saving_typical"], symbol)
+    reshuffled = "costs dealt out again each year" if chosen.reshuffle_costs else "costs kept"
+    st.caption(
+        f"{chosen.runs:,} simulated years · {reshuffled} · individual variation "
+        f"{chosen.individual_variation_pct:g}% · year-wide variation "
+        f"{chosen.cost_level_variation_pct:g}%. Every plan faces the same simulated costs."
+    )
+    ui.kpis(
+        [
+            ui.Kpi(
+                f"Above {threshold} of salary, typical year",
+                formatting.pct(odds["above_threshold_pct_typical"]),
+                note=(
+                    f"{formatting.pct(odds['above_threshold_pct_low'])} to "
+                    f"{formatting.pct(odds['above_threshold_pct_high'])} in 9 years out of 10"
+                ),
+            ),
+            ui.Kpi(
+                "Change against the current plan",
+                formatting.pp(odds["above_threshold_change_pp_typical"]),
+                note=(
+                    f"{formatting.pp(odds['above_threshold_change_pp_low'])} to "
+                    f"{formatting.pp(odds['above_threshold_change_pp_high'])} "
+                    "in 9 years out of 10"
+                ),
+            ),
+            ui.Kpi(
+                "Savings target met",
+                f"{odds['savings_target_met_pct']:.0f}% of years",
+                note=(
+                    f"Typical saving {typical_saving} against a "
+                    f"{settings.savings_target_pct:g}% target"
+                ),
+            ),
+            ui.Kpi(
+                "Assessment unchanged",
+                f"{odds['label_held_pct']:.0f}% of years",
+                note=ui.BADGES.get(odds["label"], ("neutral", odds["label"]))[1],
+            ),
+        ],
+        compact=True,
+    )
+
+    spread_column, chance_column = st.columns(2, gap="medium")
+    with spread_column, ui.card("fill-spread"):
+        ui.card_title(
+            "Employees above the threshold, year by year",
+            "The thick bar covers half of the simulated years and the thin line 9 years in "
+            "10. The gap in the bar marks the typical year, which is the figure shown.",
+        )
+        spread = simulated.spread("above_threshold_pct")
+        ui.plot(charts.simulated_ranges(spread, colours, pal))
+        shown = spread.rename(
+            columns={
+                "p5": "5th percentile",
+                "p25": "25th percentile",
+                "median": "Typical year",
+                "p75": "75th percentile",
+                "p95": "95th percentile",
+            }
+        )
+        ui.table_view(ui.display_frame(shown.reset_index(names="Plan"), pct=list(shown.columns)))
+    with chance_column, ui.card("fill-chance"):
+        ui.card_title(
+            "Chance of being above the threshold",
+            f"The share of simulated years in which an employee's burden exceeds {threshold} of "
+            f"salary, by salary band. {plan_name} beside {result.baseline_name}.",
+        )
+        chances = simulated.segments(["salary_band"])
+        ui.plot(charts.chance_by_band(chances, [result.baseline_name, plan_name], colours, pal))
+        ui.table_view(
+            ui.display_frame(
+                chances[chances["plan_name"].isin([result.baseline_name, plan_name])].rename(
+                    columns={
+                        "plan_name": "Plan",
+                        "salary_band": "Salary band",
+                        "headcount": "Employees",
+                        "chance_above_pct": "Chance above threshold",
+                        "chance_change_pp": "Change vs current (pp)",
+                    }
+                )[
+                    [
+                        "Plan",
+                        "Salary band",
+                        "Employees",
+                        "Chance above threshold",
+                        "Change vs current (pp)",
+                    ]
+                ],
+                pct=["Chance above threshold"],
+                pp=["Change vs current (pp)"],
+                whole=["Employees"],
+            )
+        )
+
+    with ui.card("simulation-plans"):
+        ui.card_title(
+            "Employees above the threshold, all plans",
+            "Target met is how often the saving reaches the target. Unchanged in is how often "
+            "a simulated year earns the same assessment as the result on the other tabs.",
+        )
+        lines = []
+        for name, row in simulated.summary.iterrows():
+            reference = name == result.baseline_name
+            lines.append(
+                {
+                    "Plan": name,
+                    "Typical year": formatting.pct(row["above_threshold_pct_typical"]),
+                    "9 years in 10": (
+                        f"{formatting.pct(row['above_threshold_pct_low'])} to "
+                        f"{formatting.pct(row['above_threshold_pct_high'])}"
+                    ),
+                    "Target met": (
+                        formatting.MISSING
+                        if reference
+                        else f"{row['savings_target_met_pct']:.0f}% of years"
+                    ),
+                    "Assessment": row["label"],
+                    "Unchanged in": (
+                        formatting.MISSING
+                        if reference
+                        else f"{row['label_held_pct']:.0f}% of years"
+                    ),
+                }
+            )
+        ui.html_table(
+            pd.DataFrame(lines),
+            numeric=["Typical year", "9 years in 10", "Target met", "Unchanged in"],
+            badges=["Assessment"],
+            strong=["Plan"],
+        )
+        if float(odds["employer_cost_high"] - odds["employer_cost_low"]) < 1:
+            st.caption(
+                "The employer's cost is the same in every simulated year because it is made up "
+                "of premiums, which do not depend on how much care employees use."
+            )
+
+    with ui.card("simulation-settings"):
+        ui.card_title("Simulation settings", "What changes from one simulated year to the next.")
+        fields = SimulationSettings.model_fields
+        with st.form("simulation-settings", border=False):
+            first, second, third, fourth = st.columns(4, gap="medium")
+            runs = first.selectbox(
+                "Simulated years",
+                SIMULATION_RUNS,
+                index=SIMULATION_RUNS.index(chosen.runs) if chosen.runs in SIMULATION_RUNS else 1,
+                format_func=lambda value: f"{value:,}",
+            )
+            individual = second.number_input(
+                "Individual variation (%)",
+                min_value=0.0,
+                max_value=100.0,
+                value=float(chosen.individual_variation_pct),
+                step=5.0,
+                format="%.0f",
+                help=fields["individual_variation_pct"].description,
+            )
+            level = third.number_input(
+                "Year-wide variation (%)",
+                min_value=0.0,
+                max_value=50.0,
+                value=float(chosen.cost_level_variation_pct),
+                step=1.0,
+                format="%.0f",
+                help=fields["cost_level_variation_pct"].description,
+            )
+            seed = fourth.number_input(
+                "Random seed",
+                min_value=0,
+                value=int(chosen.seed),
+                step=1,
+                help="The same seed gives the same simulated years every time.",
+            )
+            reshuffle = st.checkbox(
+                "Deal costs out again each year among employees with the same coverage",
+                value=chosen.reshuffle_costs,
+                help=fields["reshuffle_costs"].description,
+            )
+            rerun = st.form_submit_button("Run the simulation", type="primary")
+        if rerun:
+            try:
+                state.simulation_settings = SimulationSettings(
+                    runs=runs,
+                    reshuffle_costs=reshuffle,
+                    individual_variation_pct=individual,
+                    cost_level_variation_pct=level,
+                    seed=seed,
+                )
+            except ValidationError as error:
+                for message in format_validation_error(error):
+                    st.error(message, icon=":material/error:")
+            else:
+                st.rerun()
+
+    ui.note(
+        "The simulation shows how far results could move with different luck in who needs "
+        "care. It does not turn synthetic or assumed costs into an actuarial forecast.",
+        strong="Not a forecast.",
+    )
+
 with export_tab, ui.card("export"):
     ui.card_title(
         "Export",
@@ -526,7 +738,7 @@ with export_tab, ui.card("export"):
         )
         st.download_button(
             "All aggregate tables (ZIP)",
-            data=reporting.export_bundle(result, mitigations),
+            data=reporting.export_bundle(result, mitigations, simulated),
             file_name="benefit_stress_lab_export.zip",
             mime="application/zip",
             icon=":material/folder_zip:",

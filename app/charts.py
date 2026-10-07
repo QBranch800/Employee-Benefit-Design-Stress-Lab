@@ -194,11 +194,15 @@ def cost_vs_affordability(summary: pd.DataFrame, pal: Palette, symbol: str) -> g
     return fig
 
 
-def burden_ranges(
-    quantiles: pd.DataFrame, threshold_pct: float, colours: dict[str, str], pal: Palette
-) -> go.Figure:
+def _range_rows(
+    fig: go.Figure,
+    quantiles: pd.DataFrame,
+    colours: dict[str, str],
+    pal: Palette,
+    hover: str,
+    note: str | None = None,
+) -> list[str]:
     names = list(quantiles.index)[::-1]
-    fig = go.Figure()
     for name in names:
         row = quantiles.loc[name]
         colour = colours[name]
@@ -231,23 +235,43 @@ def burden_ranges(
                     "line": {"color": pal.card, "width": 3},
                 },
                 customdata=[[row["p5"], row["p25"], row["p75"], row["p95"]]],
-                hovertemplate=(
-                    "<b>%{x:.1f}%</b> median<br>"
-                    "Middle half: %{customdata[1]:.1f}% to %{customdata[2]:.1f}%<br>"
-                    "5th to 95th percentile: %{customdata[0]:.1f}% to %{customdata[3]:.1f}%"
-                    "<extra>%{y}</extra>"
-                ),
+                hovertemplate=hover,
             )
         )
-        fig.add_annotation(
-            xref="paper",
-            x=1,
-            y=name,
-            text=f"median {row['median']:.1f}%",
-            showarrow=False,
-            xanchor="right",
-            font=_label_font(pal),
-        )
+        if note is None:
+            fig.add_annotation(
+                x=row["p95"],
+                y=name,
+                text=f"{row['median']:.1f}%",
+                showarrow=False,
+                xanchor="left",
+                xshift=10,
+                font=_label_font(pal),
+            )
+        else:
+            fig.add_annotation(
+                xref="paper",
+                x=1,
+                y=name,
+                text=f"{note} {row['median']:.1f}%",
+                showarrow=False,
+                xanchor="right",
+                font=_label_font(pal),
+            )
+    return names
+
+
+def burden_ranges(
+    quantiles: pd.DataFrame, threshold_pct: float, colours: dict[str, str], pal: Palette
+) -> go.Figure:
+    fig = go.Figure()
+    hover = (
+        "<b>%{x:.1f}%</b> median<br>"
+        "Middle half: %{customdata[1]:.1f}% to %{customdata[2]:.1f}%<br>"
+        "5th to 95th percentile: %{customdata[0]:.1f}% to %{customdata[3]:.1f}%"
+        "<extra>%{y}</extra>"
+    )
+    names = _range_rows(fig, quantiles, colours, pal, hover, "median")
     _style(fig, pal, height=96 + 52 * len(names))
     fig.add_vline(
         x=threshold_pct,
@@ -263,6 +287,71 @@ def burden_ranges(
         range=[0, quantiles["p95"].max() * 1.5],
     )
     fig.update_yaxes(showgrid=False, type="category")
+    return fig
+
+
+def simulated_ranges(spread: pd.DataFrame, colours: dict[str, str], pal: Palette) -> go.Figure:
+    fig = go.Figure()
+    hover = (
+        "<b>%{x:.1f}%</b> in a typical year<br>"
+        "Half of years: %{customdata[1]:.1f}% to %{customdata[2]:.1f}%<br>"
+        "9 years in 10: %{customdata[0]:.1f}% to %{customdata[3]:.1f}%"
+        "<extra>%{y}</extra>"
+    )
+    names = _range_rows(fig, spread, colours, pal, hover)
+    low, high = float(spread["p5"].min()), float(spread["p95"].max())
+    span = max(high - low, 1.0)
+    _style(fig, pal, height=max(300, 96 + 52 * len(names)))
+    fig.update_xaxes(
+        title_text="Employees above the threshold",
+        ticksuffix="%",
+        range=[max(0.0, low - 0.15 * span), high + 0.45 * span],
+    )
+    fig.update_yaxes(showgrid=False, type="category")
+    return fig
+
+
+def chance_by_band(
+    segments: pd.DataFrame, plan_names: list[str], colours: dict[str, str], pal: Palette
+) -> go.Figure:
+    fig = go.Figure()
+    for name in plan_names:
+        seg = segments[segments["plan_name"] == name]
+        values = seg["chance_above_pct"]
+        fig.add_trace(
+            go.Bar(
+                name=name,
+                x=seg["salary_band"],
+                y=values,
+                marker={"color": colours[name]},
+                text=[f"{value:.0f}%" if pd.notna(value) else "" for value in values],
+                textposition="outside",
+                constraintext="none",
+                textfont=_label_font(pal, 11),
+                cliponaxis=False,
+                customdata=seg["headcount"],
+                hovertemplate=(
+                    "<b>%{y:.1f}%</b> of simulated years<br>"
+                    "%{x} · %{customdata} employees<extra>" + name + "</extra>"
+                ),
+            )
+        )
+    hidden = segments[segments["suppressed"]]["salary_band"].unique()
+    for band in hidden:
+        fig.add_annotation(
+            x=band,
+            y=0,
+            text="n too small",
+            showarrow=False,
+            yshift=12,
+            font={"color": pal.muted, "size": 11, "family": FONT_FAMILY},
+        )
+    _style(fig, pal, height=300, legend=True)
+    fig.update_layout(barmode="group", bargap=0.24, bargroupgap=0.06)
+    fig.update_xaxes(type="category")
+    fig.update_yaxes(
+        ticksuffix="%", nticks=4, range=_headroom(segments["chance_above_pct"]), rangemode="tozero"
+    )
     return fig
 
 

@@ -14,6 +14,7 @@ from benefit_stress_lab.scenarios import AnalysisResult
 from benefit_stress_lab.schemas import SimulationSettings
 
 BATCH_CELLS = 2_000_000
+SPREAD_POINTS: dict[str, float] = {"p5": 0.05, "p25": 0.25, "median": 0.5, "p75": 0.75, "p95": 0.95}
 RANGE_POINTS: dict[str, float] = {"low": 5, "typical": 50, "high": 95}
 YEAR_METRICS: tuple[str, ...] = (
     "employer_cost",
@@ -37,6 +38,12 @@ class SimulationResult:
     @property
     def baseline_name(self) -> str:
         return self.plan_names[0]
+
+    def spread(self, metric: str) -> pd.DataFrame:
+        grouped = self.years.groupby("plan_name", sort=False)[metric]
+        table = grouped.quantile(list(SPREAD_POINTS.values())).unstack()
+        table.columns = list(SPREAD_POINTS)
+        return table.reindex(list(self.plan_names))
 
     def segments(self, by: Sequence[str]) -> pd.DataFrame:
         by = list(by)

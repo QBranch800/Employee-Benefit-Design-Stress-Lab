@@ -69,7 +69,7 @@ def test_pages_render_with_demo(page):
 def test_results_open_on_the_focus_plan():
     at = open_page("pages/4_results.py", with_demo=True)
     assert at.selectbox[0].value == "B: Proposed Cost Shift"
-    assert len(at.tabs) == 5
+    assert len(at.tabs) == 6
     assert not at.info
 
 
@@ -78,6 +78,16 @@ def test_results_switch_alternative():
     at.selectbox[0].select("A: Modest Adjustment").run()
     assert not at.exception
     assert at.session_state["focus_plan"] == "A: Modest Adjustment"
+
+
+def test_changing_the_simulation_settings():
+    at = open_page("pages/4_results.py", with_demo=True)
+    assert at.session_state["simulation_settings"].individual_variation_pct == 25
+    field = next(item for item in at.number_input if item.label == "Individual variation (%)")
+    field.set_value(40.0)
+    button(at, "Run the simulation").click().run()
+    assert not at.exception
+    assert at.session_state["simulation_settings"].individual_variation_pct == 40
 
 
 def test_generating_a_workforce():
