@@ -97,9 +97,7 @@ def burden_quantiles(rows: pd.DataFrame) -> pd.DataFrame:
     return quantiles
 
 
-def _sort_segments(
-    segments: pd.DataFrame, by: Sequence[str], plan_order: list[str]
-) -> pd.DataFrame:
+def sort_segments(segments: pd.DataFrame, by: Sequence[str], plan_order: list[str]) -> pd.DataFrame:
     keys = {"plan_name": {name: i for i, name in enumerate(plan_order)}}
     for dim in by:
         order = DIMENSION_ORDER.get(dim) or tuple(sorted(segments[dim].unique()))
@@ -142,7 +140,7 @@ def segment_summary(
 
     segments["suppressed"] = segments["headcount"] < min_group_size
     segments.loc[segments["suppressed"], list(SEGMENT_METRICS)] = np.nan
-    return _sort_segments(segments, by, plan_names_in_order(rows))
+    return sort_segments(segments, by, plan_names_in_order(rows))
 
 
 def describe_segment(salary_band: str, coverage_tier: str) -> str:

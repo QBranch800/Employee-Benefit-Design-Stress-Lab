@@ -180,6 +180,39 @@ class StressAssumptions(BaseModel):
         )
 
 
+class SimulationSettings(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    runs: int = Field(default=500, ge=50, le=5_000)
+    reshuffle_costs: bool = Field(
+        default=True,
+        description=(
+            "Each simulated year, every employee draws a cost from employees with the same "
+            "coverage tier. When off, everyone keeps their own cost."
+        ),
+    )
+    individual_variation_pct: float = Field(
+        default=25,
+        ge=0,
+        le=100,
+        description="Typical random movement of one employee's cost in a simulated year.",
+    )
+    cost_level_variation_pct: float = Field(
+        default=8,
+        ge=0,
+        le=50,
+        description="Typical random movement of every employee's cost together in a year.",
+    )
+    seed: int = Field(default=2026, ge=0)
+
+    def is_fixed(self) -> bool:
+        return (
+            not self.reshuffle_costs
+            and self.individual_variation_pct == 0
+            and self.cost_level_variation_pct == 0
+        )
+
+
 def format_validation_error(error: ValidationError) -> list[str]:
     messages = []
     for item in error.errors():
