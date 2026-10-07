@@ -44,9 +44,14 @@ These are results from synthetic data under simplified rules. They illustrate th
 - Labels each alternative against user-set objectives with transparent rules
 - Recalculates five ways to soften a proposal and highlights one by a stated rule
 - Stress-tests conclusions against higher healthcare costs, more high users, salary growth, and coverage-mix changes
+- Replays the year hundreds of times with different healthcare costs, and reports ranges and likelihoods instead of a single answer
 - Exports aggregate results only
 
 ![Sensitivity heatmap of the share of employees above the threshold, beside the employer contribution trade-off](reports/figures/sensitivity.png)
+
+![Uncertainty tab: the range of employees above the threshold across simulated years, and the chance of exceeding it by salary band](reports/figures/uncertainty.png)
+
+In 500 simulated years of the demonstration, plan B leaves between 28.2% and 33.8% of employees above the threshold in 9 years out of 10, against 14.6% to 18.2% under the current plan. The ranges show how the model behaves under assumed variation. They are not a forecast.
 
 Not included: real insurer quotes, actuarial pricing, tax treatment, provider networks, co-payments, predictions of individual health, or automatic plan selection. There is no machine learning and no language model. The value is in formulas that can be read, checked, and tested.
 
@@ -185,7 +190,7 @@ pytest
 ruff check .
 ```
 
-The suite has 149 tests. They cover the cost-sharing rules, five employees calculated by hand, boundary cases, upload validation, reconciliation of segment totals to workforce totals, the stress scenarios, the exports, and a smoke test of every page.
+The suite has 172 tests. They cover the cost-sharing rules, five employees calculated by hand, boundary cases, upload validation, reconciliation of segment totals to workforce totals, the stress scenarios, the uncertainty simulation, the exports, and a smoke test of every page.
 
 ## Project layout
 
@@ -202,7 +207,7 @@ METHODOLOGY.md           Method, assumptions, and limitations
 ## Limitations
 
 - The plan rules are simplified. Real plans have co-payments, embedded family deductibles, pharmacy tiers, and networks.
-- The data is synthetic, and healthcare use is far more uncertain than a single assumed cost per employee.
+- The data is synthetic. The uncertainty simulation varies each employee's cost, but under spreads that are assumed and not estimated from real claims.
 - Burden relative to salary is one measure of affordability. Household income is not modelled.
 - Any assessment depends on the objectives and assumptions the user selects.
 
@@ -210,10 +215,7 @@ The tool must not be used to set individual premiums, deny coverage, make employ
 
 ## Roadmap
 
-One of these, done properly, is the planned next step:
-
-- Monte Carlo simulation of uncertain annual healthcare spending
-- Multi-objective plan optimisation with a Pareto frontier
+Version 0.2 added the Monte Carlo simulation of uncertain annual healthcare spending. A possible later step is multi-objective plan optimisation with a Pareto frontier.
 
 ## Licence
 

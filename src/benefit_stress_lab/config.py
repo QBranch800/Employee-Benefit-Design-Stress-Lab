@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-MODEL_VERSION = "0.1.0"
+MODEL_VERSION = "0.2.0"
 
 COVERAGE_TIERS: tuple[str, ...] = ("employee_only", "family")
 COVERAGE_TIER_LABELS: dict[str, str] = {

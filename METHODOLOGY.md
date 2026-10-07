@@ -137,6 +137,32 @@ An adjustment is built only where it would change something. One is highlighted 
 
 The sensitivity grid reruns the full comparison across combinations of healthcare cost change and share moved into high use. The contribution trade-off reruns one plan with the employer contribution set to each rate from 50% to 100%, applied to both coverage tiers. Both show whether a conclusion survives a change in assumptions.
 
+## Uncertainty simulation
+
+The single run gives every employee one assumed yearly cost. The simulation replays the year many times (500 by default) and recalculates every plan each time, to show how far the results could move with different luck in who needs care.
+
+Each simulated year, an employee's allowed cost is built in three steps:
+
+1. **Reshuffle.** The employee draws a cost at random, with replacement, from the costs of employees with the same coverage tier in the workforce, after any stress assumptions. The mix of low and high costs is preserved on average, the costs land on different people, and the number of high-cost cases varies from year to year.
+2. **Individual variation.** The cost is multiplied by a random factor with an average of 1 and a chosen spread (25% by default), drawn independently for each employee and year from a lognormal distribution.
+3. **Year-wide variation.** Every cost in that year is multiplied by one shared random factor with an average of 1 and a chosen spread (8% by default), also lognormal. This stands for years in which care is dearer or cheaper for everyone.
+
+Salaries, coverage tiers, plan rules, and premiums stay fixed. Every plan is evaluated on the same simulated costs in each year, so differences between plans come from plan design and not from different draws. The random numbers come from a fixed seed, so the same settings always give the same simulated years. With all three steps switched off, every simulated year equals the single run.
+
+For each plan the simulation reports:
+
+- the typical year (the median) and the 5th and 95th percentiles of the employer's cost, the employer's saving, and the share of employees above the threshold;
+- the share of years in which the saving meets the target, and in which the share above the threshold rises by more than the materiality limit;
+- the share of years that earn the same assessment label as the single run;
+- for each salary band and coverage tier, the average share of years in which an employee is above the threshold. Small groups are withheld as elsewhere.
+
+What the simulation does not do:
+
+- Years are independent. An employee with one costly year is no more likely to have another, which understates the risk for people with long-term conditions.
+- A cost is drawn independently of salary, age, and region, as in the synthetic workforce.
+- Premiums are not repriced in response to simulated costs. Where a plan has no employer allowance, the employer's cost is made up of premiums and is the same in every simulated year.
+- The spreads are assumptions chosen by the user, not estimates from claims data. The ranges describe how the model behaves under those assumptions. They are not confidence intervals for a real workforce, and the simulation does not turn synthetic results into an actuarial forecast.
+
 ## Simplifications
 
 Real plans include features this model leaves out:
@@ -165,7 +191,7 @@ The tool must not be used to:
 ## Limitations
 
 - Synthetic data cannot establish real-world accuracy.
-- Healthcare use is uncertain and highly skewed. Each employee has one assumed yearly cost, not a range of possible years.
+- Healthcare use is uncertain and highly skewed. The single run gives each employee one assumed yearly cost. The uncertainty simulation varies it, under spreads that are assumed and not estimated from data.
 - Premiums do not necessarily equal underlying claims costs, and the economics of fully insured and self-funded employers differ.
 - Burden relative to salary is only one dimension of affordability. Household income and other resources are not modelled.
 - Group averages and medians can conceal individual hardship.
@@ -173,4 +199,4 @@ The tool must not be used to:
 
 ## Verification
 
-Automated tests check the calculations against five employees worked by hand, the boundary cases (spending exactly at the deductible, exactly reaching the maximum, contribution rates of 0% and 100%, an employee exactly at the threshold), and reconciliation of segment totals to workforce totals. This verifies the arithmetic. It is not actuarial validation.
+Automated tests check the calculations against five employees worked by hand, the boundary cases (spending exactly at the deductible, exactly reaching the maximum, contribution rates of 0% and 100%, an employee exactly at the threshold), and reconciliation of segment totals to workforce totals. They also check that the simulation reproduces the single run when all variation is switched off, gives the same years for the same seed, and matches a case whose probability is known. This verifies the arithmetic. It is not actuarial validation.
